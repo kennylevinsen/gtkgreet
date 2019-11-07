@@ -6,9 +6,9 @@ GTK based greeter for greetd, to be run under cage or similar.
 
 1. Install the requirements:
 
-1. greetd
-2. cage
-3. gtkgreet
+    1. greetd
+    2. cage
+    3. gtkgreet
 
 2. Write the following to the greetd config file:
 
