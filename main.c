@@ -2,24 +2,42 @@
 #include <json-c/json_object.h>
 #include <json-c/json_tokener.h>
 
+#include <time.h>
+
 #include "proto.h"
 
 struct context {
-    GtkWidget *username;
-    GtkWidget *password;
-    GtkWidget *info;
+    GtkWidget *username_entry;
+    GtkWidget *password_entry;
+    GtkWidget *info_label;
+    GtkWidget *clock_label;
 };
 
 struct context ctx;
 
+static gboolean draw_clock(gpointer data) {
+    struct context *ctx = (struct context*)data;
+    time_t now = time(&now);
+    struct tm *now_tm = localtime(&now);
+    if (now_tm == NULL) {
+        return TRUE;
+    }
+
+    char time[14];
+    g_snprintf(time, 14, "Login - %02d:%02d", now_tm->tm_hour, now_tm->tm_min);
+    gtk_label_set_text((GtkLabel*)ctx->clock_label, time);
+
+    return TRUE;
+}
+
 static void login(GtkWidget *widget, gpointer data) {
     struct context *ctx = (struct context*)data;
-    gtk_label_set_text((GtkLabel*)ctx->info, "Logging in");
+    gtk_label_set_markup((GtkLabel*)ctx->info_label, "<span color=\"black\">Logging in</span>");
 
     struct json_object* login_req = json_object_new_object();
     json_object_object_add(login_req, "type", json_object_new_string("login"));
-    json_object_object_add(login_req, "username", json_object_new_string(gtk_entry_get_text((GtkEntry*)ctx->username)));
-    json_object_object_add(login_req, "password", json_object_new_string(gtk_entry_get_text((GtkEntry*)ctx->password)));
+    json_object_object_add(login_req, "username", json_object_new_string(gtk_entry_get_text((GtkEntry*)ctx->username_entry)));
+    json_object_object_add(login_req, "password", json_object_new_string(gtk_entry_get_text((GtkEntry*)ctx->password_entry)));
 
     struct json_object* cmd = json_object_new_array();
     json_object_array_add(cmd, json_object_new_string("sway"));
@@ -41,7 +59,7 @@ static void login(GtkWidget *widget, gpointer data) {
     const char* typestr = json_object_get_string(type);
 
     if (typestr == NULL || strcmp(typestr, "success") != 0) {
-        gtk_label_set_markup((GtkLabel*)ctx->info, "<span color=\"darkred\">Login failed</span>");
+        gtk_label_set_markup((GtkLabel*)ctx->info_label, "<span color=\"darkred\">Login failed</span>");
     } else {
         exit(0);
     }
@@ -49,7 +67,7 @@ static void login(GtkWidget *widget, gpointer data) {
     json_object_put(resp);
 }
 
-static void activate (GtkApplication *app, gpointer user_data) {
+static void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *window = gtk_application_window_new(app);
     gtk_window_set_title(GTK_WINDOW(window), "Greeter");
     gtk_window_set_default_size(GTK_WINDOW(window), 200, 200);
@@ -58,30 +76,38 @@ static void activate (GtkApplication *app, gpointer user_data) {
     gtk_container_add(GTK_CONTAINER(window), window_box);
     gtk_widget_set_valign(window_box, GTK_ALIGN_CENTER);
 
+    ctx.clock_label = gtk_label_new("Login - 12:34");
+    g_object_set(ctx.clock_label, "margin-bottom", 10, NULL);
+    gtk_widget_set_halign(ctx.info_label, GTK_ALIGN_END);
+    gtk_widget_set_valign(ctx.info_label, GTK_ALIGN_END);
+    gtk_container_add(GTK_CONTAINER(window_box), ctx.clock_label);
+    g_timeout_add(5000, draw_clock, &ctx);
+    draw_clock(&ctx);
+
     GtkWidget *input_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     gtk_widget_set_halign(input_box, GTK_ALIGN_CENTER);
     gtk_widget_set_size_request(input_box, 512, -1);
     gtk_container_add(GTK_CONTAINER(window_box), input_box);
 
-    ctx.username = gtk_entry_new();
-    gtk_entry_set_placeholder_text((GtkEntry*)ctx.username, "Username");
-    gtk_container_add(GTK_CONTAINER(input_box), ctx.username);
+    ctx.username_entry = gtk_entry_new();
+    gtk_entry_set_placeholder_text((GtkEntry*)ctx.username_entry, "Username");
+    gtk_container_add(GTK_CONTAINER(input_box), ctx.username_entry);
 
-    ctx.password = gtk_entry_new();
-    g_signal_connect(ctx.password, "activate", G_CALLBACK(login), &ctx);
-    gtk_entry_set_placeholder_text((GtkEntry*)ctx.password, "Password");
-    gtk_entry_set_input_purpose((GtkEntry*)ctx.password, GTK_INPUT_PURPOSE_PASSWORD);
-    gtk_entry_set_visibility((GtkEntry*)ctx.password, FALSE);
-    gtk_container_add(GTK_CONTAINER(input_box), ctx.password);
+    ctx.password_entry = gtk_entry_new();
+    g_signal_connect(ctx.password_entry, "activate", G_CALLBACK(login), &ctx);
+    gtk_entry_set_placeholder_text((GtkEntry*)ctx.password_entry, "Password");
+    gtk_entry_set_input_purpose((GtkEntry*)ctx.password_entry, GTK_INPUT_PURPOSE_PASSWORD);
+    gtk_entry_set_visibility((GtkEntry*)ctx.password_entry, FALSE);
+    gtk_container_add(GTK_CONTAINER(input_box), ctx.password_entry);
 
     GtkWidget *bottom_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(bottom_box, GTK_ALIGN_END);
     gtk_container_add(GTK_CONTAINER(input_box), bottom_box);
 
-    ctx.info = gtk_label_new("");
-    gtk_widget_set_halign(ctx.info, GTK_ALIGN_START);
-    g_object_set(ctx.info, "margin-right", 10, NULL);
-    gtk_container_add(GTK_CONTAINER(bottom_box), ctx.info);
+    ctx.info_label = gtk_label_new("");
+    gtk_widget_set_halign(ctx.info_label, GTK_ALIGN_START);
+    g_object_set(ctx.info_label, "margin-right", 10, NULL);
+    gtk_container_add(GTK_CONTAINER(bottom_box), ctx.info_label);
 
     GtkWidget *button = gtk_button_new_with_label("Login");
     g_signal_connect(button, "clicked", G_CALLBACK(login), &ctx);
