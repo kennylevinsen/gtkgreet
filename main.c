@@ -1,21 +1,20 @@
 #include <gtk/gtk.h>
 #include <json-c/json_object.h>
+#include <json-c/json_tokener.h>
+
+#include "proto.h"
 
 struct context {
     GtkWidget *username;
     GtkWidget *password;
+    GtkWidget *info;
 };
 
 struct context ctx;
 
-static void* roundtrip(void *req) {
-    char* greetd_sock = getenv("GREETD_SOCK");
-    g_print("Request to %s: %s\n", greetd_sock, (char*)req);
-    return NULL;
-}
-
 static void login(GtkWidget *widget, gpointer data) {
     struct context *ctx = (struct context*)data;
+    gtk_label_set_text((GtkLabel*)ctx->info, "Logging in");
 
     struct json_object* login_req = json_object_new_object();
     json_object_object_add(login_req, "type", json_object_new_string("login"));
@@ -31,7 +30,23 @@ static void login(GtkWidget *widget, gpointer data) {
     json_object_object_add(env, "XDG_SESSION_DESKTOP", json_object_new_string("sway"));
     json_object_object_add(login_req, "env", env);
 
-    roundtrip((void*)json_object_get_string(login_req));
+    struct json_object* resp = roundtrip(login_req);
+
+    json_object_put(login_req);
+
+    struct json_object* type;
+
+    json_object_object_get_ex(resp, "type", &type);
+
+    const char* typestr = json_object_get_string(type);
+
+    if (typestr == NULL || strcmp(typestr, "success") != 0) {
+        gtk_label_set_markup((GtkLabel*)ctx->info, "<span color=\"darkred\">Login failed</span>");
+    } else {
+        exit(0);
+    }
+
+    json_object_put(resp);
 }
 
 static void activate (GtkApplication *app, gpointer user_data) {
@@ -49,18 +64,29 @@ static void activate (GtkApplication *app, gpointer user_data) {
     gtk_container_add(GTK_CONTAINER(window_box), input_box);
 
     ctx.username = gtk_entry_new();
+    gtk_entry_set_placeholder_text((GtkEntry*)ctx.username, "Username");
     gtk_container_add(GTK_CONTAINER(input_box), ctx.username);
 
     ctx.password = gtk_entry_new();
     g_signal_connect(ctx.password, "activate", G_CALLBACK(login), &ctx);
+    gtk_entry_set_placeholder_text((GtkEntry*)ctx.password, "Password");
     gtk_entry_set_input_purpose((GtkEntry*)ctx.password, GTK_INPUT_PURPOSE_PASSWORD);
     gtk_entry_set_visibility((GtkEntry*)ctx.password, FALSE);
     gtk_container_add(GTK_CONTAINER(input_box), ctx.password);
 
+    GtkWidget *bottom_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_halign(bottom_box, GTK_ALIGN_END);
+    gtk_container_add(GTK_CONTAINER(input_box), bottom_box);
+
+    ctx.info = gtk_label_new("");
+    gtk_widget_set_halign(ctx.info, GTK_ALIGN_START);
+    g_object_set(ctx.info, "margin-right", 10, NULL);
+    gtk_container_add(GTK_CONTAINER(bottom_box), ctx.info);
+
     GtkWidget *button = gtk_button_new_with_label("Login");
     g_signal_connect(button, "clicked", G_CALLBACK(login), &ctx);
     gtk_widget_set_halign(button, GTK_ALIGN_END);
-    gtk_container_add(GTK_CONTAINER(input_box), button);
+    gtk_container_add(GTK_CONTAINER(bottom_box), button);
 
     gtk_widget_show_all(window);
 }
