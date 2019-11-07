@@ -10,10 +10,6 @@ GTK based greeter for greetd, to be run under cage or similar.
     2. cage
     3. gtkgreet
 
-2. Write the following to the greetd config file:
-
-```
-greeter = "cage gtkgreet"
-```
+2. Write the following to the greetd config file: `greeter = "cage gtkgreet"`
 
 3. (Re-)start greetd.
