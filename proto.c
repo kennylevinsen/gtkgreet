@@ -41,8 +41,9 @@ static int write_req(int fd, struct json_object* req) {
 static struct json_object* read_resp(int fd) {
     struct header header = {};
     struct json_object* resp = NULL;
-
+    char *respstr = NULL;
     ssize_t off = 0;
+
     while (off < sizeof(struct header)) {
         char* headerp = (char*)&header;
         ssize_t n = read(fd, &headerp[off], sizeof(struct header)-off);
@@ -52,13 +53,14 @@ static struct json_object* read_resp(int fd) {
         off += n;
     }
 
+
     if (header.magic != 0xAFBFCFDF ||
         header.version != 1) {
         goto end;
     }
 
     off = 0;
-    char* respstr = (char*)calloc(1, header.payload_len+1);
+    respstr = (char*)calloc(1, header.payload_len+1);
     while (off < header.payload_len) {
         int n = read(fd, &respstr[off], header.payload_len-off);
         if (n < 0) {
