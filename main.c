@@ -69,6 +69,10 @@ static void login(GtkWidget *widget, gpointer data) {
     json_object_put(resp);
 }
 
+static void quit(GtkWidget *widget, gpointer data) {
+    exit(0);
+}
+
 static void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *window = gtk_application_window_new(app);
     gtk_window_set_title(GTK_WINDOW(window), "Greeter");
@@ -114,6 +118,11 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_widget_set_halign(ctx.info_label, GTK_ALIGN_START);
     g_object_set(ctx.info_label, "margin-right", 10, NULL);
     gtk_container_add(GTK_CONTAINER(bottom_box), ctx.info_label);
+
+    GtkWidget *quit_button = gtk_button_new_with_label("Quit");
+    g_signal_connect(quit_button, "clicked", G_CALLBACK(quit), &ctx);
+    gtk_widget_set_halign(quit_button, GTK_ALIGN_END);
+    gtk_container_add(GTK_CONTAINER(bottom_box), quit_button);
 
     GtkWidget *button = gtk_button_new_with_label("Login");
     g_signal_connect(button, "clicked", G_CALLBACK(login), &ctx);
