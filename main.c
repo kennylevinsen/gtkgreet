@@ -11,6 +11,7 @@ struct context {
     GtkWidget *password_entry;
     GtkWidget *info_label;
     GtkWidget *clock_label;
+    GtkWidget *target_combo_box;
 };
 
 struct context ctx;
@@ -32,20 +33,21 @@ static gboolean draw_clock(gpointer data) {
 
 static void login(GtkWidget *widget, gpointer data) {
     struct context *ctx = (struct context*)data;
-    gtk_label_set_markup((GtkLabel*)ctx->info_label, "<span color=\"black\">Logging in</span>");
+    gtk_label_set_markup((GtkLabel*)ctx->info_label, "<span>Logging in</span>");
 
     struct json_object* login_req = json_object_new_object();
     json_object_object_add(login_req, "type", json_object_new_string("login"));
     json_object_object_add(login_req, "username", json_object_new_string(gtk_entry_get_text((GtkEntry*)ctx->username_entry)));
     json_object_object_add(login_req, "password", json_object_new_string(gtk_entry_get_text((GtkEntry*)ctx->password_entry)));
 
+    char* selection = gtk_combo_box_text_get_active_text((GtkComboBoxText*)ctx->target_combo_box);
+
     struct json_object* cmd = json_object_new_array();
-    json_object_array_add(cmd, json_object_new_string("sway"));
+    json_object_array_add(cmd, json_object_new_string(selection));
     json_object_object_add(login_req, "command", cmd);
 
     struct json_object* env = json_object_new_object();
-    json_object_object_add(env, "XDG_SESSION_TYPE", json_object_new_string("wayland"));
-    json_object_object_add(env, "XDG_SESSION_DESKTOP", json_object_new_string("sway"));
+    json_object_object_add(env, "XDG_SESSION_DESKTOP", json_object_new_string(selection));
     json_object_object_add(login_req, "env", env);
 
     struct json_object* resp = roundtrip(login_req);
@@ -100,7 +102,13 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_entry_set_visibility((GtkEntry*)ctx.password_entry, FALSE);
     gtk_container_add(GTK_CONTAINER(input_box), ctx.password_entry);
 
-    GtkWidget *bottom_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    ctx.target_combo_box = gtk_combo_box_text_new_with_entry();
+    gtk_combo_box_text_append((GtkComboBoxText*)ctx.target_combo_box, NULL, "sway");
+    gtk_combo_box_text_append((GtkComboBoxText*)ctx.target_combo_box, NULL, "bash");
+    gtk_combo_box_set_active((GtkComboBox*)ctx.target_combo_box, 0);
+    gtk_container_add(GTK_CONTAINER(input_box), ctx.target_combo_box);
+
+    GtkWidget *bottom_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
     gtk_widget_set_halign(bottom_box, GTK_ALIGN_END);
     gtk_container_add(GTK_CONTAINER(input_box), bottom_box);
 
