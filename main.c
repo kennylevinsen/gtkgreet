@@ -80,8 +80,6 @@ static void activate(GtkApplication *app, gpointer user_data) {
 
     ctx.clock_label = gtk_label_new("Login - 12:34");
     g_object_set(ctx.clock_label, "margin-bottom", 10, NULL);
-    gtk_widget_set_halign(ctx.info_label, GTK_ALIGN_END);
-    gtk_widget_set_valign(ctx.info_label, GTK_ALIGN_END);
     gtk_container_add(GTK_CONTAINER(window_box), ctx.clock_label);
     g_timeout_add(5000, draw_clock, &ctx);
     draw_clock(&ctx);
