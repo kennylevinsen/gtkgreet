@@ -20,4 +20,11 @@ greeter = "cage gtkgreet"
 greeter_user = "greeter"
 ```
 
-3. (Re-)start greetd.
+3. Add the environments you want to be able to run to `/etc/greetd/environments` like so:
+
+```
+sway
+bash
+```
+
+4. (Re-)start greetd.
