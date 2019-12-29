@@ -112,22 +112,25 @@ static void poweroff_prompt(GtkWidget *widget, gpointer data) {
     gtk_widget_destroy(dialog);
 }
 
-static void update_env_combobox(GtkWidget *combobox) {
+static int update_env_combobox(GtkWidget *combobox) {
     char buffer[255];
     FILE *fp = fopen("/etc/greetd/environments", "r");
     if (fp == NULL) {
-        return;
+        return 0;
     }
 
+    int entries = 0;
     while(fgets(buffer, 255, (FILE*) fp)) {
         size_t len = strnlen(buffer, 255);
         if (len > 0 && len < 255 && buffer[len-1] == '\n') {
             buffer[len-1] = '\0';
         }
         gtk_combo_box_text_append((GtkComboBoxText*)combobox, NULL, buffer);
+        entries++;
     }
 
     fclose(fp);
+    return entries;
 }
 
 static void activate(GtkApplication *app, gpointer user_data) {
