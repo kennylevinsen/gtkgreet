@@ -72,11 +72,11 @@ static void login(GtkWidget *widget, gpointer data) {
 }
 
 
-static void exit_action(struct context *ctx, char *action) {
+static void shutdown_action(struct context *ctx, char *action) {
     gtk_label_set_markup((GtkLabel*)ctx->info_label, "<span>Logging in</span>");
 
     struct json_object* login_req = json_object_new_object();
-    json_object_object_add(login_req, "type", json_object_new_string("exit"));
+    json_object_object_add(login_req, "type", json_object_new_string("shutdown"));
     json_object_object_add(login_req, "action", json_object_new_string(action));
     struct json_object* resp = roundtrip(login_req);
 
@@ -97,7 +97,7 @@ static void exit_action(struct context *ctx, char *action) {
     json_object_put(resp);
 }
 
-static void poweroff_prompt(GtkWidget *widget, gpointer data) {
+static void shutdown_prompt(GtkWidget *widget, gpointer data) {
     struct context *ctx = (struct context*)data;
     GtkWidget *dialog = gtk_message_dialog_new(
         GTK_WINDOW(ctx->window),
@@ -119,10 +119,10 @@ static void poweroff_prompt(GtkWidget *widget, gpointer data) {
             exit(0);
             break;
         case 2:
-            exit_action(ctx, "reboot");
+            shutdown_action(ctx, "reboot");
             break;
         case 3:
-            exit_action(ctx, "poweroff");
+            shutdown_action(ctx, "poweroff");
             break;
         default:
             break;
@@ -200,10 +200,10 @@ static void activate(GtkApplication *app, gpointer user_data) {
     g_object_set(ctx.info_label, "margin-right", 10, NULL);
     gtk_container_add(GTK_CONTAINER(bottom_box), ctx.info_label);
 
-    GtkWidget *quit_button = gtk_button_new_with_label("Quit");
-    g_signal_connect(quit_button, "clicked", G_CALLBACK(poweroff_prompt), &ctx);
-    gtk_widget_set_halign(quit_button, GTK_ALIGN_END);
-    gtk_container_add(GTK_CONTAINER(bottom_box), quit_button);
+    GtkWidget *shutdown_button = gtk_button_new_with_label("Shutdown");
+    g_signal_connect(shutdown_button, "clicked", G_CALLBACK(shutdown_prompt), &ctx);
+    gtk_widget_set_halign(shutdown_button, GTK_ALIGN_END);
+    gtk_container_add(GTK_CONTAINER(bottom_box), shutdown_button);
 
     GtkWidget *button = gtk_button_new_with_label("Login");
     g_signal_connect(button, "clicked", G_CALLBACK(login), &ctx);
