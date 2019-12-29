@@ -101,7 +101,7 @@ static void shutdown_prompt(GtkWidget *widget, gpointer data) {
     struct context *ctx = (struct context*)data;
     GtkWidget *dialog = gtk_message_dialog_new(
         GTK_WINDOW(ctx->window),
-        GTK_DIALOG_DESTROY_WITH_PARENT,
+        GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
         GTK_MESSAGE_QUESTION,
         GTK_BUTTONS_NONE,
         "What do you want to do?");
