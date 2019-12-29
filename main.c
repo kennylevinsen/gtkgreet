@@ -7,6 +7,7 @@
 #include "proto.h"
 
 struct context {
+    GtkWidget *window;
     GtkWidget *username_entry;
     GtkWidget *password_entry;
     GtkWidget *info_label;
@@ -76,12 +77,12 @@ static void quit(GtkWidget *widget, gpointer data) {
 static void activate(GtkApplication *app, gpointer user_data) {
     g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", TRUE, NULL);
 
-    GtkWidget *window = gtk_application_window_new(app);
-    gtk_window_set_title(GTK_WINDOW(window), "Greeter");
-    gtk_window_set_default_size(GTK_WINDOW(window), 200, 200);
+    ctx.window = gtk_application_window_new(app);
+    gtk_window_set_title(GTK_WINDOW(ctx.window), "Greeter");
+    gtk_window_set_default_size(GTK_WINDOW(ctx.window), 200, 200);
 
     GtkWidget *window_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    gtk_container_add(GTK_CONTAINER(window), window_box);
+    gtk_container_add(GTK_CONTAINER(ctx.window), window_box);
     gtk_widget_set_valign(window_box, GTK_ALIGN_CENTER);
 
     ctx.clock_label = gtk_label_new("Login - 12:34");
@@ -131,7 +132,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_widget_set_halign(button, GTK_ALIGN_END);
     gtk_container_add(GTK_CONTAINER(bottom_box), button);
 
-    gtk_widget_show_all(window);
+    gtk_widget_show_all(ctx.window);
 }
 
 int main (int argc, char **argv) {
