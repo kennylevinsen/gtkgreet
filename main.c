@@ -112,6 +112,24 @@ static void poweroff_prompt(GtkWidget *widget, gpointer data) {
     gtk_widget_destroy(dialog);
 }
 
+static void update_env_combobox(GtkWidget *combobox) {
+    char buffer[255];
+    FILE *fp = fopen("/etc/greetd/environments", "r");
+    if (fp == NULL) {
+        return;
+    }
+
+    while(fgets(buffer, 255, (FILE*) fp)) {
+        size_t len = strnlen(buffer, 255);
+        if (len > 0 && len < 255 && buffer[len-1] == '\n') {
+            buffer[len-1] = '\0';
+        }
+        gtk_combo_box_text_append((GtkComboBoxText*)combobox, NULL, buffer);
+    }
+
+    fclose(fp);
+}
+
 static void activate(GtkApplication *app, gpointer user_data) {
     g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", TRUE, NULL);
 
@@ -146,8 +164,9 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_container_add(GTK_CONTAINER(input_box), ctx.password_entry);
 
     ctx.target_combo_box = gtk_combo_box_text_new_with_entry();
-    gtk_combo_box_text_append((GtkComboBoxText*)ctx.target_combo_box, NULL, "sway");
-    gtk_combo_box_text_append((GtkComboBoxText*)ctx.target_combo_box, NULL, "bash");
+    update_env_combobox(ctx.target_combo_box);
+    GtkWidget *combo_box_entry = gtk_bin_get_child((GtkBin*)ctx.target_combo_box);
+    gtk_entry_set_placeholder_text((GtkEntry*)combo_box_entry, "Command to run");
     gtk_combo_box_set_active((GtkComboBox*)ctx.target_combo_box, 0);
     gtk_container_add(GTK_CONTAINER(input_box), ctx.target_combo_box);
 
