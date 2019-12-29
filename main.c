@@ -70,8 +70,46 @@ static void login(GtkWidget *widget, gpointer data) {
     json_object_put(resp);
 }
 
-static void quit(GtkWidget *widget, gpointer data) {
-    exit(0);
+static void run(char *cmd) {
+    int pid = fork();
+    if (pid == -1 || pid != 0) {
+        return;
+    }
+
+    execl("/bin/sh", "-c", cmd, NULL);
+}
+
+static void poweroff_prompt(GtkWidget *widget, gpointer data) {
+    struct context *ctx = (struct context*)data;
+    GtkWidget *dialog = gtk_message_dialog_new(
+        GTK_WINDOW(ctx->window),
+        GTK_DIALOG_DESTROY_WITH_PARENT,
+        GTK_MESSAGE_QUESTION,
+        GTK_BUTTONS_NONE,
+        "What do you want to do?");
+
+    gtk_dialog_add_button((GtkDialog*)dialog, "Cancel", GTK_RESPONSE_REJECT);
+    gtk_dialog_add_button((GtkDialog*)dialog, "Quit", 1);
+    GtkWidget *reboot_button = gtk_dialog_add_button((GtkDialog*)dialog, "Reboot", 2);
+    gtk_style_context_add_class(gtk_widget_get_style_context(reboot_button), "destructive-action");
+    GtkWidget *poweroff_button = gtk_dialog_add_button((GtkDialog*)dialog, "Power off", 3);
+    gtk_style_context_add_class(gtk_widget_get_style_context(poweroff_button), "destructive-action");
+
+
+    switch (gtk_dialog_run((GtkDialog*)dialog)) {
+        case 1:
+            exit(0);
+            break;
+        case 2:
+            run("reboot");
+            break;
+        case 3:
+            run("poweroff");
+            break;
+        default:
+            break;
+    }
+    gtk_widget_destroy(dialog);
 }
 
 static void activate(GtkApplication *app, gpointer user_data) {
@@ -123,7 +161,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_container_add(GTK_CONTAINER(bottom_box), ctx.info_label);
 
     GtkWidget *quit_button = gtk_button_new_with_label("Quit");
-    g_signal_connect(quit_button, "clicked", G_CALLBACK(quit), &ctx);
+    g_signal_connect(quit_button, "clicked", G_CALLBACK(poweroff_prompt), &ctx);
     gtk_widget_set_halign(quit_button, GTK_ALIGN_END);
     gtk_container_add(GTK_CONTAINER(bottom_box), quit_button);
 
