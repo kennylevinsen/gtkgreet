@@ -25,9 +25,9 @@ static gboolean draw_clock(gpointer data) {
         return TRUE;
     }
 
-    char time[14];
-    g_snprintf(time, 14, "Login - %02d:%02d", now_tm->tm_hour, now_tm->tm_min);
-    gtk_label_set_text((GtkLabel*)ctx->clock_label, time);
+    char time[48];
+    g_snprintf(time, 48, "<span size='xx-large'>%02d:%02d</span>", now_tm->tm_hour, now_tm->tm_min);
+    gtk_label_set_markup((GtkLabel*)ctx->clock_label, time);
 
     return TRUE;
 }
@@ -161,7 +161,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_container_add(GTK_CONTAINER(ctx.window), window_box);
     gtk_widget_set_valign(window_box, GTK_ALIGN_CENTER);
 
-    ctx.clock_label = gtk_label_new("Login - 12:34");
+    ctx.clock_label = gtk_label_new("");
     g_object_set(ctx.clock_label, "margin-bottom", 10, NULL);
     gtk_container_add(GTK_CONTAINER(window_box), ctx.clock_label);
     g_timeout_add(5000, draw_clock, &ctx);
