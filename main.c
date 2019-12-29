@@ -70,13 +70,30 @@ static void login(GtkWidget *widget, gpointer data) {
     json_object_put(resp);
 }
 
-static void run(char *cmd) {
-    int pid = fork();
-    if (pid == -1 || pid != 0) {
-        return;
+
+static void exit_action(struct context *ctx, char *action) {
+    gtk_label_set_markup((GtkLabel*)ctx->info_label, "<span>Logging in</span>");
+
+    struct json_object* login_req = json_object_new_object();
+    json_object_object_add(login_req, "type", json_object_new_string("exit"));
+    json_object_object_add(login_req, "action", json_object_new_string(action));
+    struct json_object* resp = roundtrip(login_req);
+
+    json_object_put(login_req);
+
+    struct json_object* type;
+
+    json_object_object_get_ex(resp, "type", &type);
+
+    const char* typestr = json_object_get_string(type);
+
+    if (typestr == NULL || strcmp(typestr, "success") != 0) {
+        gtk_label_set_markup((GtkLabel*)ctx->info_label, "<span color=\"darkred\">Exit action failed</span>");
+    } else {
+        exit(0);
     }
 
-    execl("/bin/sh", "-c", cmd, NULL);
+    json_object_put(resp);
 }
 
 static void poweroff_prompt(GtkWidget *widget, gpointer data) {
@@ -101,10 +118,10 @@ static void poweroff_prompt(GtkWidget *widget, gpointer data) {
             exit(0);
             break;
         case 2:
-            run("reboot");
+            exit_action(ctx, "reboot");
             break;
         case 3:
-            run("poweroff");
+            exit_action(ctx, "poweroff");
             break;
         default:
             break;
