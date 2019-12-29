@@ -41,7 +41,7 @@ static void login(GtkWidget *widget, gpointer data) {
     json_object_object_add(login_req, "username", json_object_new_string(gtk_entry_get_text((GtkEntry*)ctx->username_entry)));
     json_object_object_add(login_req, "password", json_object_new_string(gtk_entry_get_text((GtkEntry*)ctx->password_entry)));
 
-    char* selection = gtk_combo_box_text_get_active_text((GtkComboBoxText*)ctx->target_combo_box);
+    gchar* selection = gtk_combo_box_text_get_active_text((GtkComboBoxText*)ctx->target_combo_box);
 
     struct json_object* cmd = json_object_new_array();
     json_object_array_add(cmd, json_object_new_string(selection));
@@ -68,6 +68,7 @@ static void login(GtkWidget *widget, gpointer data) {
     }
 
     json_object_put(resp);
+    g_free(selection);
 }
 
 
