@@ -49,6 +49,7 @@ static void login(GtkWidget *widget, gpointer data) {
 
     struct json_object* env = json_object_new_object();
     json_object_object_add(env, "XDG_SESSION_DESKTOP", json_object_new_string(selection));
+    json_object_object_add(env, "XDG_CURRENT_DESKTOP", json_object_new_string(selection));
     json_object_object_add(login_req, "env", env);
 
     struct json_object* resp = roundtrip(login_req);
