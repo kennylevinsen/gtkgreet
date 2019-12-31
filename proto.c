@@ -155,9 +155,8 @@ int send_login(const char *username, const char * password, const char *command)
 
     const char* typestr = json_object_get_string(type);
 
-    int ret = typestr == NULL || strcmp(typestr, "success") != 0;
+    int ret = typestr != NULL && strcmp(typestr, "success") == 0;
     json_object_put(resp);
-
     return ret;
 }
 
@@ -175,7 +174,7 @@ int send_shutdown(const char *action) {
 
     const char* typestr = json_object_get_string(type);
 
-    int ret = typestr == NULL || strcmp(typestr, "success") != 0;
+    int ret = typestr != NULL && strcmp(typestr, "success") == 0;
     json_object_put(resp);
     return ret;
 }
