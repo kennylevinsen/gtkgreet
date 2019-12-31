@@ -28,3 +28,17 @@ bash
 ```
 
 4. (Re-)start greetd.
+
+## How to build
+
+```
+meson build
+ninja -C build
+```
+
+## How to build with gtk-layer-shell
+
+```
+meson -Dlayershell=true build
+ninja -C build
+```

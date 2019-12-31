@@ -1,3 +1,7 @@
-#include <json-c/json_object.h>
+#ifndef _PROTO_H
+#define _PROTO_H
 
-struct json_object* roundtrip(struct json_object* req);
+int send_login(const char *username, const char * password, const char *command);
+int send_shutdown(const char *action);
+
+#endif
