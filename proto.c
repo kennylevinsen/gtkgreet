@@ -140,9 +140,14 @@ int send_login(const char *username, const char * password, const char *command)
     json_object_array_add(cmd, json_object_new_string(command));
     json_object_object_add(login_req, "command", cmd);
 
-    struct json_object* env = json_object_new_object();
-    json_object_object_add(env, "XDG_SESSION_DESKTOP", json_object_new_string(command));
-    json_object_object_add(env, "XDG_CURRENT_DESKTOP", json_object_new_string(command));
+    struct json_object* env = json_object_new_array();
+
+    char buf[128];
+    snprintf(buf, 128, "XDG_SESSION_DESKTOP=%s", command);
+    json_object_array_add(env, json_object_new_string(buf));
+    snprintf(buf, 128, "XDG_CURRENT_DESKTOP=%s", command);
+    json_object_array_add(env, json_object_new_string(buf));
+
     json_object_object_add(login_req, "env", env);
 
     struct json_object* resp = roundtrip(login_req);
