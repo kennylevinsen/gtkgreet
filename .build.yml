@@ -2,6 +2,7 @@ image: archlinux
 packages:
   - gcc
   - meson
+  - gtk3
 sources:
   - https://git.sr.ht/~kennylevinsen/gtkgreet
 tasks:
