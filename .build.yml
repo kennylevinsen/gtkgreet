@@ -1,0 +1,11 @@
+image: archlinux
+packages:
+  - gcc
+  - meson
+sources:
+  - https://git.sr.ht/~kennylevinsen/gtkgreet
+tasks:
+  - build: |
+      cd gtkgreet
+      meson build
+      ninja -C build
