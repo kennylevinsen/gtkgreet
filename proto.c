@@ -8,6 +8,9 @@
 #include <stdio.h>
 #include <errno.h>
 
+#include "proto.h"
+#include "window.h"
+
 struct header {
     uint32_t magic;
     uint32_t version;
@@ -16,54 +19,52 @@ struct header {
 
 static int write_req(int fd, struct json_object* req) {
     const char* reqstr = json_object_get_string(req);
-    struct header header = {
-        .magic = 0xAFBFCFDF,
-        .version = 1,
-        .payload_len = strlen(reqstr),
-    };
+    uint32_t len = strlen(reqstr);
+    char* headerp = (char*)&len;
+    ssize_t off = 0;
 
-    if (write(fd, &header, sizeof(struct header)) != sizeof(struct header)) {
-        return -1;
+    while (off < 4) {
+        ssize_t n = write(fd, &headerp[off], 4-off);
+        if (n < 1) {
+            goto error;
+        }
+        off += n;
     }
 
-    ssize_t off = 0;
-    while (off < header.payload_len) {
-        ssize_t n = write(fd, &reqstr[off], header.payload_len-off);
-        if (n < 0) {
-            return -1;
+    off = 0;
+    while (off < len) {
+        ssize_t n = write(fd, &reqstr[off], len-off);
+        if (n < 1) {
+            goto error;
         }
         off += n;
     }
  
     return 0;
+error:
+    return -1;
 }
 
 static struct json_object* read_resp(int fd) {
-    struct header header = {};
     struct json_object* resp = NULL;
     char *respstr = NULL;
+    uint32_t len;
     ssize_t off = 0;
 
-    while (off < sizeof(struct header)) {
-        char* headerp = (char*)&header;
-        ssize_t n = read(fd, &headerp[off], sizeof(struct header)-off);
-        if (n < 0) {
+    while (off < 4) {
+        char* headerp = (char*)&len;
+        ssize_t n = read(fd, &headerp[off], 4-off);
+        if (n < 1) {
             goto end;
         }
         off += n;
     }
 
-
-    if (header.magic != 0xAFBFCFDF ||
-        header.version != 1) {
-        goto end;
-    }
-
     off = 0;
-    respstr = (char*)calloc(1, header.payload_len+1);
-    while (off < header.payload_len) {
-        int n = read(fd, &respstr[off], header.payload_len-off);
-        if (n < 0) {
+    respstr = (char*)calloc(1,len+1);
+    while (off <len) {
+        int n = read(fd, &respstr[off],len-off);
+        if (n < 1) {
             goto end;
         }
         off += n;
@@ -98,7 +99,7 @@ static int connectto(const char* path) {
     return fd;
 }
 
-static struct json_object* roundtrip(struct json_object* req) {
+static struct json_object* roundtrip_json(struct json_object* req) {
     struct json_object* resp = NULL;
     int fd;
     char* greetd_sock = getenv("GREETD_SOCK");
@@ -130,56 +131,129 @@ end:
     return resp;
 }
 
-int send_login(const char *username, const char * password, const char *command) {
-    struct json_object* login_req = json_object_new_object();
-    json_object_object_add(login_req, "type", json_object_new_string("login"));
-    json_object_object_add(login_req, "username", json_object_new_string(username));
-    json_object_object_add(login_req, "password", json_object_new_string(password));
+const char* json_get_string_from_object(struct json_object* obj, const char* key) {
 
-    struct json_object* cmd = json_object_new_array();
-    json_object_array_add(cmd, json_object_new_string(command));
-    json_object_object_add(login_req, "command", cmd);
-
-    struct json_object* env = json_object_new_array();
-
-    char buf[128];
-    snprintf(buf, 128, "XDG_SESSION_DESKTOP=%s", command);
-    json_object_array_add(env, json_object_new_string(buf));
-    snprintf(buf, 128, "XDG_CURRENT_DESKTOP=%s", command);
-    json_object_array_add(env, json_object_new_string(buf));
-
-    json_object_object_add(login_req, "env", env);
-
-    struct json_object* resp = roundtrip(login_req);
-
-    json_object_put(login_req);
-
-    struct json_object* type;
-
-    json_object_object_get_ex(resp, "type", &type);
-
-    const char* typestr = json_object_get_string(type);
-
-    int ret = typestr != NULL && strcmp(typestr, "success") == 0;
-    json_object_put(resp);
-    return ret;
+    struct json_object* val = json_object_object_get(obj, key);
+    if (val == NULL) {
+        return NULL;
+    }
+    return json_object_get_string(val);
 }
 
-int send_shutdown(const char *action) {
-    struct json_object* login_req = json_object_new_object();
-    json_object_object_add(login_req, "type", json_object_new_string("shutdown"));
-    json_object_object_add(login_req, "action", json_object_new_string(action));
-    struct json_object* resp = roundtrip(login_req);
+struct response roundtrip(struct request req) {
+    struct json_object *json_req = json_object_new_object();
+    switch (req.request_type) {
+    case request_type_create_session: {
+        json_object_object_add(json_req, "type", json_object_new_string("create_session"));
+        json_object_object_add(json_req, "username", json_object_new_string(req.body.request_create_session.username));
+        break;
+    }
+    case request_type_start_session: {
+        json_object_object_add(json_req, "type", json_object_new_string("start_session"));
+        struct json_object* cmd = json_object_new_array();
+        json_object_array_add(cmd, json_object_new_string(req.body.request_start_session.cmd));
+        json_object_object_add(json_req, "cmd", cmd);
 
-    json_object_put(login_req);
+        struct json_object* env = json_object_new_array();
 
-    struct json_object* type;
+        char buf[196];
+        snprintf(buf, 196, "XDG_SESSION_DESKTOP=%s", req.body.request_start_session.cmd);
+        json_object_array_add(env, json_object_new_string(buf));
+        snprintf(buf, 196, "XDG_CURRENT_DESKTOP=%s", req.body.request_start_session.cmd);
+        json_object_array_add(env, json_object_new_string(buf));
 
-    json_object_object_get_ex(resp, "type", &type);
+        json_object_object_add(json_req, "env", env);
+        break;
+    }
+    case request_type_post_auth_message_response: {
+        json_object_object_add(json_req, "type", json_object_new_string("post_auth_message_response"));
+        json_object_object_add(json_req, "response", json_object_new_string(req.body.request_post_auth_message_response.response));
+        break;
+    }
+    case request_type_cancel_session: {
+        json_object_object_add(json_req, "type", json_object_new_string("cancel_session"));
+        break;
+    }
+    }
 
-    const char* typestr = json_object_get_string(type);
+    struct response resp = {
+        .response_type = response_type_roundtrip_error,
+    };
+    resp.body.response_error.error_type = error_type_error;
 
-    int ret = typestr != NULL && strcmp(typestr, "success") == 0;
-    json_object_put(resp);
-    return ret;
+    struct json_object* json_resp = roundtrip_json(json_req);
+    if (json_resp == NULL) {
+        snprintf(resp.body.response_error.description, 128, "proto: roundtrip failed");
+        goto done;
+    }
+
+    const char* typestr = json_get_string_from_object(json_resp, "type");
+    if (typestr == NULL) {
+        snprintf(resp.body.response_error.description, 128, "proto: no type found");
+        goto done;
+    }
+
+
+    if (strcmp(typestr, "success") == 0) {
+        resp.response_type = response_type_success;
+        goto done;
+    }
+
+    if (strcmp(typestr, "auth_message") == 0) {
+        const char* messagestr = json_get_string_from_object(json_resp, "auth_message");
+        if (messagestr == NULL) {
+            resp.response_type = response_type_error;
+            snprintf(resp.body.response_error.description, 128, "proto: no message");
+            goto done;
+        }
+        const char* auth_message_typestr = json_get_string_from_object(json_resp, "auth_message_type");
+        if (auth_message_typestr == NULL) {
+            resp.response_type = response_type_error;
+            snprintf(resp.body.response_error.description, 128, "proto: no message type");
+            goto done;
+        }
+        resp.response_type = response_type_auth_message;
+        if (strcmp(auth_message_typestr, "visible") == 0) {
+            resp.body.response_auth_message.auth_message_type = auth_message_type_visible;
+        } else if (strcmp(auth_message_typestr, "secret") == 0) {
+            resp.body.response_auth_message.auth_message_type = auth_message_type_secret;
+        } else if (strcmp(auth_message_typestr, "info") == 0) {
+            resp.body.response_auth_message.auth_message_type = auth_message_type_info;
+        } else if (strcmp(auth_message_typestr, "error") == 0) {
+            resp.body.response_auth_message.auth_message_type = auth_message_type_error;
+        } else {
+            resp.response_type = response_type_error;
+            snprintf(resp.body.response_error.description, 128, "proto: unknown message type");
+            goto done;
+        }
+
+        strncpy(resp.body.response_auth_message.auth_message, messagestr, sizeof(resp.body.response_auth_message.auth_message)-1);
+        goto done;
+    }
+
+    if (strcmp(typestr, "error") == 0) {
+        const char* descriptionstr = json_get_string_from_object(json_resp, "description");
+        if (descriptionstr == NULL) {
+            resp.response_type = response_type_error;
+            snprintf(resp.body.response_error.description, 128, "proto: no error description");
+            goto done;
+        }
+        resp.response_type = response_type_error;
+
+        const char* errortypestr = json_get_string_from_object(json_resp, "error_type");
+        if (strcmp(errortypestr, "auth_error") == 0) {
+            resp.body.response_error.error_type = error_type_auth;
+        } else {
+            resp.body.response_error.error_type = error_type_error;
+        }
+
+        strncpy(resp.body.response_error.description, descriptionstr, sizeof(resp.body.response_error.description)-1);
+        goto done;
+    }
+
+    snprintf(resp.body.response_error.description, 128, "proto: no known type");
+
+done:
+    json_object_put(json_resp);
+    return resp;
 }
