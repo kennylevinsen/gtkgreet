@@ -1,4 +1,5 @@
 #include "gtkgreet.h"
+#include "auth_question.h"
 
 struct Window* gtkgreet_window_by_widget(struct GtkGreet *gtkgreet, GtkWidget *window) {
     for (guint idx = 0; idx < gtkgreet->windows->len; idx++) {

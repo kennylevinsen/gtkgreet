@@ -44,7 +44,7 @@ static void answer_question_action(GtkWidget *widget, gpointer data) {
             struct request req = {
                 .request_type = request_type_start_session,
             };
-            strncpy(req.body.request_start_session.cmd, gtkgreet->command, 128);
+            strncpy(req.body.request_start_session.cmd, gtkgreet->command, 127);
             resp = roundtrip(req);
             if (resp.response_type == response_type_success) {
                 exit(0);
