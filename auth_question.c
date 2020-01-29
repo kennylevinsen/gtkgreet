@@ -6,6 +6,7 @@
 #include "auth_question.h"
 #include "proto.h"
 #include "window.h"
+#include "gtkgreet.h"
 
 static void answer_question_action(GtkWidget *widget, gpointer data) {
     struct Window *ctx = (struct Window*)data;
@@ -43,8 +44,8 @@ static void answer_question_action(GtkWidget *widget, gpointer data) {
         case response_type_success: {
             struct request req = {
                 .request_type = request_type_start_session,
-                .body.request_start_session.cmd = "sway",
             };
+            strncpy(req.body.request_start_session.cmd, gtkgreet->command, 128);
             resp = roundtrip(req);
             if (resp.response_type == response_type_success) {
                 exit(0);

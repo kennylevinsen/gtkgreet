@@ -6,6 +6,7 @@
 
 #ifdef LAYER_SHELL
 static gboolean use_layer_shell = FALSE;
+static char* command = NULL;
 #endif
 
 static GOptionEntry entries[] =
@@ -13,6 +14,7 @@ static GOptionEntry entries[] =
 
 #ifdef LAYER_SHELL
   { "layer-shell", 'l', 0, G_OPTION_ARG_NONE, &use_layer_shell, "Use layer shell", NULL},
+  { "command", 'c', 0, G_OPTION_ARG_STRING, &command, "Command to run", "sway"},
 #endif
 
   { NULL }
@@ -111,6 +113,7 @@ int main (int argc, char **argv) {
 #ifdef LAYER_SHELL
     gtkgreet->use_layer_shell = use_layer_shell;
 #endif
+    gtkgreet->command = command;
 
     g_signal_connect(gtkgreet->app, "activate", G_CALLBACK(activate), NULL);
 

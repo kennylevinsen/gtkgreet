@@ -13,7 +13,7 @@ struct GtkGreet {
 #ifdef LAYER_SHELL
     gboolean use_layer_shell;
 #endif
-
+    char* command;
 };
 
 struct GtkGreet *gtkgreet;
