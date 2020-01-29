@@ -9,9 +9,8 @@
 #include "gtkgreet.h"
 
 static void answer_question_action(GtkWidget *widget, gpointer data) {
-    struct Window *ctx = (struct Window*)data;
     struct response resp;
-    switch (ctx->question_type) {
+    switch (gtkgreet->question_type) {
         case QuestionTypeInitial: {
             struct request req = {
                 .request_type = request_type_create_session,
@@ -57,11 +56,11 @@ static void answer_question_action(GtkWidget *widget, gpointer data) {
             if (resp.response_type == response_type_error) {
                 error = resp.body.response_error.description;
             }
-            setup_question(ctx, QuestionTypeInitial, "Username:", error);
+            gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, "Username:", error);
             break;
         }
         case response_type_auth_message: {
-            setup_question(ctx,
+            gtkgreet_setup_question(gtkgreet,
                 resp.body.response_auth_message.auth_message_type,
                 resp.body.response_auth_message.auth_message,
                 NULL);
@@ -73,7 +72,7 @@ static void answer_question_action(GtkWidget *widget, gpointer data) {
                 .request_type = request_type_cancel_session,
             };
             roundtrip(req);
-            setup_question(ctx, QuestionTypeInitial, "Username:", resp.body.response_error.description);
+            gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, "Username:", resp.body.response_error.description);
             break;
         }
     }
@@ -83,7 +82,6 @@ static void cancel_initial_action(GtkWidget *widget, gpointer data) {
     exit(0);
 }
 static void cancel_question_action(GtkWidget *widget, gpointer data) {
-    struct Window *ctx = (struct Window*)data;
     struct request req = {
         .request_type = request_type_cancel_session,
     };
@@ -92,16 +90,15 @@ static void cancel_question_action(GtkWidget *widget, gpointer data) {
         exit(1);
     }
 
-    setup_question(ctx, QuestionTypeInitial, "Username:", NULL);
+    gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, "Username:", NULL);
 }
 
 void setup_question(struct Window *ctx, enum QuestionType type, char* question, char* error) {
     if (ctx->input != NULL) {
         gtk_widget_destroy(ctx->input);
         ctx->input = NULL;
+        ctx->input_field = NULL;
     }
-    GtkWidget *entry = NULL;
-    ctx->question_type = type;
     ctx->input = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     GtkWidget *question_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
     gtk_widget_set_halign(question_box, GTK_ALIGN_CENTER);
@@ -113,10 +110,10 @@ void setup_question(struct Window *ctx, enum QuestionType type, char* question, 
             gtk_widget_set_halign(label, GTK_ALIGN_START);
             gtk_container_add(GTK_CONTAINER(question_box), label);
 
-            entry = gtk_entry_new();
-            g_signal_connect(entry, "activate", G_CALLBACK(answer_question_action), ctx);
-            gtk_widget_set_size_request(entry, 384, -1);
-            gtk_container_add(GTK_CONTAINER(question_box), entry);
+            ctx->input_field = gtk_entry_new();
+            g_signal_connect(ctx->input_field, "activate", G_CALLBACK(answer_question_action), ctx);
+            gtk_widget_set_size_request(ctx->input_field, 384, -1);
+            gtk_container_add(GTK_CONTAINER(question_box), ctx->input_field);
             break;
         }
         case QuestionTypeSecret: {
@@ -124,12 +121,12 @@ void setup_question(struct Window *ctx, enum QuestionType type, char* question, 
             gtk_widget_set_halign(label, GTK_ALIGN_START);
             gtk_container_add(GTK_CONTAINER(question_box), label);
 
-            entry = gtk_entry_new();
-            gtk_entry_set_input_purpose((GtkEntry*)entry, GTK_INPUT_PURPOSE_PASSWORD);
-            gtk_entry_set_visibility((GtkEntry*)entry, FALSE);
-            g_signal_connect(entry, "activate", G_CALLBACK(answer_question_action), ctx);
-            gtk_widget_set_size_request(entry, 384, -1);
-            gtk_container_add(GTK_CONTAINER(question_box), entry);
+            ctx->input_field = gtk_entry_new();
+            gtk_entry_set_input_purpose((GtkEntry*)ctx->input_field, GTK_INPUT_PURPOSE_PASSWORD);
+            gtk_entry_set_visibility((GtkEntry*)ctx->input_field, FALSE);
+            g_signal_connect(ctx->input_field, "activate", G_CALLBACK(answer_question_action), ctx);
+            gtk_widget_set_size_request(ctx->input_field, 384, -1);
+            gtk_container_add(GTK_CONTAINER(question_box), ctx->input_field);
             break;
         }
         case QuestionTypeInfo:
@@ -173,7 +170,7 @@ void setup_question(struct Window *ctx, enum QuestionType type, char* question, 
 
     gtk_widget_show_all(ctx->window);
 
-    if (entry != NULL) {
-        gtk_widget_grab_focus(entry);
+    if (ctx->input_field != NULL) {
+        gtk_widget_grab_focus(ctx->input_field);
     }
 }

@@ -20,7 +20,15 @@
 
     static gboolean window_enter_notify(GtkWidget *widget, gpointer data) {
         struct Window *win = gtkgreet_window_by_widget(gtkgreet, widget);
-        window_set_focus(win);
+        if (win == NULL)
+            return FALSE;
+
+        if (win != gtkgreet->focused_window) {
+            window_set_focus_layer_shell(win);
+            window_set_focus(win);
+        }
+
+        gtkgreet->focused_window = win;
         return FALSE;
     }
 
@@ -82,7 +90,7 @@ static void window_setup(struct Window *ctx) {
     gtk_widget_set_size_request(ctx->input_box, 384, -1);
     gtk_container_add(GTK_CONTAINER(window_box), ctx->input_box);
 
-    setup_question(ctx, QuestionTypeInitial, "Username:", NULL);
+    gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, "Username:", NULL);
 
     gtk_widget_show_all(ctx->window);
 }
@@ -94,8 +102,13 @@ static void window_destroy_notify(GtkWidget *widget, gpointer data) {
 
 void window_set_focus(struct Window* win) {
     assert(win != NULL);
-    window_set_focus_layer_shell(win);
-    gtkgreet->focused_window = win;
+    if (gtkgreet->focused_window != NULL && gtkgreet->focused_window != win) {
+        struct Window* old = gtkgreet->focused_window;
+        if (old->input_field != NULL && win->input_field != NULL) {
+            gtk_entry_set_text((GtkEntry*)win->input_field, gtk_entry_get_text((GtkEntry*)old->input_field));
+            gtk_entry_set_text((GtkEntry*)old->input_field, "");
+        }
+    }
 }
 
 void create_window(GdkMonitor *monitor) {

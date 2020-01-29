@@ -3,13 +3,6 @@
 
 #include <gtk/gtk.h>
 
-enum QuestionType {
-	QuestionTypeInitial = 0,
-	QuestionTypeVisible = 1,
-	QuestionTypeSecret = 2,
-	QuestionTypeInfo = 3,
-	QuestionTypeError = 4,
-};
 
 struct Window {
     GdkMonitor *monitor;
@@ -17,10 +10,9 @@ struct Window {
     GtkWidget *window;
     GtkWidget *input_box;
     GtkWidget *input;
+    GtkWidget *input_field;
     GtkWidget *info_label;
     GtkWidget *clock_label;
-
-    enum QuestionType question_type;
 };
 
 void create_window(GdkMonitor *monitor);
