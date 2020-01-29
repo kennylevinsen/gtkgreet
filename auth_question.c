@@ -99,6 +99,7 @@ void setup_question(struct Window *ctx, enum QuestionType type, char* question, 
         gtk_widget_destroy(ctx->input);
         ctx->input = NULL;
     }
+    GtkWidget *entry = NULL;
     ctx->question_type = type;
     ctx->input = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     GtkWidget *question_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
@@ -111,10 +112,10 @@ void setup_question(struct Window *ctx, enum QuestionType type, char* question, 
             gtk_widget_set_halign(label, GTK_ALIGN_START);
             gtk_container_add(GTK_CONTAINER(question_box), label);
 
-            GtkWidget *widget = gtk_entry_new();
-            g_signal_connect(widget, "activate", G_CALLBACK(answer_question_action), ctx);
-            gtk_widget_set_size_request(widget, 384, -1);
-            gtk_container_add(GTK_CONTAINER(question_box), widget);
+            entry = gtk_entry_new();
+            g_signal_connect(entry, "activate", G_CALLBACK(answer_question_action), ctx);
+            gtk_widget_set_size_request(entry, 384, -1);
+            gtk_container_add(GTK_CONTAINER(question_box), entry);
             break;
         }
         case QuestionTypeSecret: {
@@ -122,12 +123,12 @@ void setup_question(struct Window *ctx, enum QuestionType type, char* question, 
             gtk_widget_set_halign(label, GTK_ALIGN_START);
             gtk_container_add(GTK_CONTAINER(question_box), label);
 
-            GtkWidget *widget = gtk_entry_new();
-            gtk_entry_set_input_purpose((GtkEntry*)widget, GTK_INPUT_PURPOSE_PASSWORD);
-            gtk_entry_set_visibility((GtkEntry*)widget, FALSE);
-            g_signal_connect(widget, "activate", G_CALLBACK(answer_question_action), ctx);
-            gtk_widget_set_size_request(widget, 384, -1);
-            gtk_container_add(GTK_CONTAINER(question_box), widget);
+            entry = gtk_entry_new();
+            gtk_entry_set_input_purpose((GtkEntry*)entry, GTK_INPUT_PURPOSE_PASSWORD);
+            gtk_entry_set_visibility((GtkEntry*)entry, FALSE);
+            g_signal_connect(entry, "activate", G_CALLBACK(answer_question_action), ctx);
+            gtk_widget_set_size_request(entry, 384, -1);
+            gtk_container_add(GTK_CONTAINER(question_box), entry);
             break;
         }
         case QuestionTypeInfo:
@@ -170,4 +171,8 @@ void setup_question(struct Window *ctx, enum QuestionType type, char* question, 
     gtk_container_add(GTK_CONTAINER(bottom_box), button);
 
     gtk_widget_show_all(ctx->window);
+
+    if (entry != NULL) {
+        gtk_widget_grab_focus(entry);
+    }
 }
