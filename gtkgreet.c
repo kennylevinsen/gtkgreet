@@ -1,5 +1,7 @@
+#include <gtk/gtk.h>
+
+#include "window.h"
 #include "gtkgreet.h"
-#include "auth_question.h"
 
 struct Window* gtkgreet_window_by_widget(struct GtkGreet *gtkgreet, GtkWidget *window) {
     for (guint idx = 0; idx < gtkgreet->windows->len; idx++) {
@@ -39,6 +41,6 @@ void gtkgreet_setup_question(struct GtkGreet *gtkgreet, enum QuestionType type, 
     gtkgreet->question_type = type;
     for (guint idx = 0; idx < gtkgreet->windows->len; idx++) {
         struct Window *ctx = g_array_index(gtkgreet->windows, struct Window*, idx);
-        setup_question(ctx, type, question, error);
+        window_setup_question(ctx, type, question, error);
     }
 }

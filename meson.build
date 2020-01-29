@@ -7,4 +7,4 @@ if get_option('layershell')
 	add_project_arguments('-DLAYER_SHELL', language : 'c')
 endif
 
-executable('gtkgreet', ['main.c', 'proto.c', 'auth_question.c', 'window.c', 'gtkgreet.c'], dependencies : dependencies)
+executable('gtkgreet', ['main.c', 'proto.c', 'actions.c', 'window.c', 'gtkgreet.c'], dependencies : dependencies)

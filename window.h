@@ -3,6 +3,7 @@
 
 #include <gtk/gtk.h>
 
+#include "gtkgreet.h"
 
 struct Window {
     GdkMonitor *monitor;
@@ -17,5 +18,6 @@ struct Window {
 
 void create_window(GdkMonitor *monitor);
 void window_set_focus(struct Window* win);
+void window_setup_question(struct Window *ctx, enum QuestionType type, char* question, char* error);
 
 #endif

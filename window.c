@@ -6,7 +6,7 @@
 #include "proto.h"
 #include "window.h"
 #include "gtkgreet.h"
-#include "auth_question.h"
+#include "actions.h"
 
 #ifdef LAYER_SHELL
 #   include <gtk-layer-shell.h>
@@ -33,16 +33,17 @@
     }
 
     static void window_setup_layershell(struct Window *ctx) {
-        if (gtkgreet->use_layer_shell) {
-
             gtk_widget_add_events(ctx->window, GDK_ENTER_NOTIFY_MASK);
-            g_signal_connect(ctx->window, "enter-notify-event", G_CALLBACK(window_enter_notify), NULL);
+        g_signal_connect(ctx->window, "enter-notify-event", G_CALLBACK(window_enter_notify), NULL);
 
-            gtk_layer_init_for_window(GTK_WINDOW(ctx->window));
-            gtk_layer_set_layer(GTK_WINDOW(ctx->window), GTK_LAYER_SHELL_LAYER_TOP);
-            gtk_layer_set_monitor(GTK_WINDOW(ctx->window), ctx->monitor);
-            gtk_layer_auto_exclusive_zone_enable(GTK_WINDOW(ctx->window));
-        }
+        gtk_layer_init_for_window(GTK_WINDOW(ctx->window));
+        gtk_layer_set_layer(GTK_WINDOW(ctx->window), GTK_LAYER_SHELL_LAYER_TOP);
+        gtk_layer_set_monitor(GTK_WINDOW(ctx->window), ctx->monitor);
+        gtk_layer_auto_exclusive_zone_enable(GTK_WINDOW(ctx->window));
+        gtk_layer_set_margin(GTK_WINDOW(ctx->window), GTK_LAYER_SHELL_EDGE_LEFT, 0);
+        gtk_layer_set_margin(GTK_WINDOW(ctx->window), GTK_LAYER_SHELL_EDGE_RIGHT, 0);
+        gtk_layer_set_margin(GTK_WINDOW(ctx->window), GTK_LAYER_SHELL_EDGE_TOP, 0);
+        gtk_layer_set_margin(GTK_WINDOW(ctx->window), GTK_LAYER_SHELL_EDGE_BOTTOM, 0);
     }
 
 #else
@@ -65,12 +66,81 @@ static gboolean draw_clock(gpointer data) {
     return TRUE;
 }
 
+void window_setup_question(struct Window *ctx, enum QuestionType type, char* question, char* error) {
+    if (ctx->input != NULL) {
+        gtk_widget_destroy(ctx->input);
+        ctx->input = NULL;
+        ctx->input_field = NULL;
+    }
+    ctx->input = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    GtkWidget *question_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    gtk_widget_set_halign(question_box, GTK_ALIGN_CENTER);
+    switch (type) {
+        case QuestionTypeInitial:
+        case QuestionTypeVisible:
+        case QuestionTypeSecret: {
+            GtkWidget *label = gtk_label_new(question);
+            gtk_widget_set_halign(label, GTK_ALIGN_START);
+            gtk_container_add(GTK_CONTAINER(question_box), label);
+
+            ctx->input_field = gtk_entry_new();
+            if (type == QuestionTypeSecret) {
+                gtk_entry_set_input_purpose((GtkEntry*)ctx->input_field, GTK_INPUT_PURPOSE_PASSWORD);
+                gtk_entry_set_visibility((GtkEntry*)ctx->input_field, FALSE);
+            }
+            g_signal_connect(ctx->input_field, "activate", G_CALLBACK(action_answer_question), ctx);
+            gtk_widget_set_size_request(ctx->input_field, 384, -1);
+            gtk_container_add(GTK_CONTAINER(question_box), ctx->input_field);
+            break;
+        }
+        case QuestionTypeInfo:
+        case QuestionTypeError:
+            // TODO: Prompt for OK?
+            break;
+    }
+
+    gtk_container_add(GTK_CONTAINER(ctx->input), question_box);
+    gtk_container_add(GTK_CONTAINER(ctx->input_box), ctx->input);
+
+    GtkWidget *bottom_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    gtk_widget_set_halign(bottom_box, GTK_ALIGN_END);
+    gtk_container_add(GTK_CONTAINER(ctx->input), bottom_box);
+
+    if (error != NULL) {
+        GtkWidget *label = gtk_label_new(error);
+        char err[128];
+        snprintf(err, 128, "<span color=\"red\">%s</span>", error);
+        gtk_label_set_markup((GtkLabel*)label, err);
+        gtk_widget_set_halign(label, GTK_ALIGN_START);
+        gtk_container_add(GTK_CONTAINER(bottom_box), label);
+    }
+
+    GtkWidget *button = gtk_button_new_with_label("Cancel");
+    switch (type) {
+        case QuestionTypeInitial: {
+            g_signal_connect(button, "clicked", G_CALLBACK(action_quit), ctx);
+            break;
+        }
+        case QuestionTypeVisible:
+        case QuestionTypeSecret:
+        case QuestionTypeInfo:
+        case QuestionTypeError: {
+            g_signal_connect(button, "clicked", G_CALLBACK(action_cancel_question), ctx);
+            break;
+        }
+    }
+
+    gtk_widget_set_halign(button, GTK_ALIGN_END);
+    gtk_container_add(GTK_CONTAINER(bottom_box), button);
+
+    gtk_widget_show_all(ctx->window);
+
+    if (ctx->input_field != NULL) {
+        gtk_widget_grab_focus(ctx->input_field);
+    }
+}
+
 static void window_setup(struct Window *ctx) {
-    window_setup_layershell(ctx);
-
-    gtk_window_set_title(GTK_WINDOW(ctx->window), "Greeter");
-    gtk_window_set_default_size(GTK_WINDOW(ctx->window), 200, 200);
-
     GtkWidget *window_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     g_object_set(window_box, "margin-bottom", 100, NULL);
     g_object_set(window_box, "margin-top", 100, NULL);
@@ -90,7 +160,7 @@ static void window_setup(struct Window *ctx) {
     gtk_widget_set_size_request(ctx->input_box, 384, -1);
     gtk_container_add(GTK_CONTAINER(window_box), ctx->input_box);
 
-    gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, "Username:", NULL);
+    gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, INITIAL_QUESTION, NULL);
 
     gtk_widget_show_all(ctx->window);
 }
@@ -122,6 +192,16 @@ void create_window(GdkMonitor *monitor) {
 
     w->window = gtk_application_window_new(gtkgreet->app);
     g_signal_connect(w->window, "destroy", G_CALLBACK(window_destroy_notify), NULL);
+    gtk_window_set_title(GTK_WINDOW(w->window), "Greeter");
 
+    if (gtkgreet->use_layer_shell) {
+        window_setup_layershell(w);
+
+        GdkRectangle rect;
+        gdk_monitor_get_workarea(monitor, &rect);
+        gtk_widget_set_size_request(w->window, rect.width, rect.height);
+    } else {
+        gtk_window_set_default_size(GTK_WINDOW(w->window), 200, 200);
+    }
     window_setup(w);
 }
