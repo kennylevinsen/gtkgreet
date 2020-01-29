@@ -4,9 +4,10 @@
 #include "window.h"
 #include "gtkgreet.h"
 
+static char* command = NULL;
+
 #ifdef LAYER_SHELL
 static gboolean use_layer_shell = FALSE;
-static char* command = NULL;
 #endif
 
 static GOptionEntry entries[] =
