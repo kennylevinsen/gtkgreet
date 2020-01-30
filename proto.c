@@ -155,13 +155,6 @@ struct response roundtrip(struct request req) {
         json_object_object_add(json_req, "cmd", cmd);
 
         struct json_object* env = json_object_new_array();
-
-        char buf[196];
-        snprintf(buf, 196, "XDG_SESSION_DESKTOP=%s", req.body.request_start_session.cmd);
-        json_object_array_add(env, json_object_new_string(buf));
-        snprintf(buf, 196, "XDG_CURRENT_DESKTOP=%s", req.body.request_start_session.cmd);
-        json_object_array_add(env, json_object_new_string(buf));
-
         json_object_object_add(json_req, "env", env);
         break;
     }
