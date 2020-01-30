@@ -3,15 +3,17 @@
 
 #include <gtk/gtk.h>
 
-#include "gtkgreet.h"
+// Defined in gtkgreet.h
+enum QuestionType;
 
 struct Window {
     GdkMonitor *monitor;
 
     GtkWidget *window;
+    GtkWidget *body;
     GtkWidget *input_box;
-    GtkWidget *input;
     GtkWidget *input_field;
+    GtkWidget *command_selector;
     GtkWidget *info_label;
     GtkWidget *clock_label;
 };

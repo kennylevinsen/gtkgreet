@@ -1,8 +1,6 @@
 #ifndef _PROTO_H
 #define _PROTO_H
 
-#include "window.h"
-
 //
 // Request types
 //

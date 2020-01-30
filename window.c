@@ -7,6 +7,7 @@
 #include "window.h"
 #include "gtkgreet.h"
 #include "actions.h"
+#include "config.h"
 
 #ifdef LAYER_SHELL
 #   include <gtk-layer-shell.h>
@@ -68,12 +69,15 @@ static gboolean draw_clock(gpointer data) {
 }
 
 void window_setup_question(struct Window *ctx, enum QuestionType type, char* question, char* error) {
-    if (ctx->input != NULL) {
-        gtk_widget_destroy(ctx->input);
-        ctx->input = NULL;
+    if (ctx->input_box != NULL) {
+        gtk_widget_destroy(ctx->input_box);
+        ctx->input_box = NULL;
+
+        // Children of the box
         ctx->input_field = NULL;
+        ctx->command_selector = NULL;
     }
-    ctx->input = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    ctx->input_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     GtkWidget *question_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
     gtk_widget_set_halign(question_box, GTK_ALIGN_CENTER);
     switch (type) {
@@ -95,17 +99,35 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
             break;
         }
         case QuestionTypeInfo:
-        case QuestionTypeError:
-            // TODO: Prompt for OK?
+        case QuestionTypeError: {
+            GtkWidget *label = gtk_label_new(question);
+            gtk_widget_set_halign(label, GTK_ALIGN_START);
+            gtk_container_add(GTK_CONTAINER(question_box), label);
             break;
+        }
     }
 
-    gtk_container_add(GTK_CONTAINER(ctx->input), question_box);
-    gtk_container_add(GTK_CONTAINER(ctx->input_box), ctx->input);
+    gtk_container_add(GTK_CONTAINER(ctx->input_box), question_box);
+
+    if (type == QuestionTypeInitial) {
+        ctx->command_selector = gtk_combo_box_text_new_with_entry();
+        gtk_widget_set_size_request(ctx->command_selector, 384, -1);
+        config_update_command_selector(ctx->command_selector);
+        gtk_widget_set_halign(ctx->command_selector, GTK_ALIGN_END);
+        gtk_combo_box_set_active((GtkComboBox*)ctx->command_selector, 0);
+
+        GtkWidget *selector_entry = gtk_bin_get_child((GtkBin*)ctx->command_selector);
+        gtk_entry_set_placeholder_text((GtkEntry*)selector_entry, "Command to run on login");
+        g_signal_connect(selector_entry, "activate", G_CALLBACK(action_answer_question), ctx);
+
+        gtk_container_add(GTK_CONTAINER(ctx->input_box), ctx->command_selector);
+    }
+
+    gtk_container_add(GTK_CONTAINER(ctx->body), ctx->input_box);
 
     GtkWidget *bottom_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
     gtk_widget_set_halign(bottom_box, GTK_ALIGN_END);
-    gtk_container_add(GTK_CONTAINER(ctx->input), bottom_box);
+    gtk_container_add(GTK_CONTAINER(ctx->input_box), bottom_box);
 
     if (error != NULL) {
         GtkWidget *label = gtk_label_new(error);
@@ -116,23 +138,31 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
         gtk_container_add(GTK_CONTAINER(bottom_box), label);
     }
 
-    GtkWidget *button = gtk_button_new_with_label("Cancel");
+    GtkWidget *cancel_button = gtk_button_new_with_label("Cancel");
     switch (type) {
         case QuestionTypeInitial: {
-            g_signal_connect(button, "clicked", G_CALLBACK(action_quit), ctx);
+            g_signal_connect(cancel_button, "clicked", G_CALLBACK(action_quit), ctx);
             break;
         }
         case QuestionTypeVisible:
         case QuestionTypeSecret:
         case QuestionTypeInfo:
         case QuestionTypeError: {
-            g_signal_connect(button, "clicked", G_CALLBACK(action_cancel_question), ctx);
+            g_signal_connect(cancel_button, "clicked", G_CALLBACK(action_cancel_question), ctx);
             break;
         }
     }
 
-    gtk_widget_set_halign(button, GTK_ALIGN_END);
-    gtk_container_add(GTK_CONTAINER(bottom_box), button);
+    gtk_widget_set_halign(cancel_button, GTK_ALIGN_END);
+    gtk_container_add(GTK_CONTAINER(bottom_box), cancel_button);
+
+    GtkWidget *continue_button = gtk_button_new_with_label("Log in");
+    g_signal_connect(continue_button, "clicked", G_CALLBACK(action_answer_question), ctx);
+    GtkStyleContext *continue_button_style = gtk_widget_get_style_context(continue_button);
+    gtk_style_context_add_class(continue_button_style, "suggested-action");
+
+    gtk_widget_set_halign(continue_button, GTK_ALIGN_END);
+    gtk_container_add(GTK_CONTAINER(bottom_box), continue_button);
 
     gtk_widget_show_all(ctx->window);
 
@@ -156,10 +186,10 @@ static void window_setup(struct Window *ctx) {
     g_timeout_add(5000, draw_clock, ctx);
     draw_clock(ctx);
 
-    ctx->input_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-    gtk_widget_set_halign(ctx->input_box, GTK_ALIGN_CENTER);
-    gtk_widget_set_size_request(ctx->input_box, 384, -1);
-    gtk_container_add(GTK_CONTAINER(window_box), ctx->input_box);
+    ctx->body = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    gtk_widget_set_halign(ctx->body, GTK_ALIGN_CENTER);
+    gtk_widget_set_size_request(ctx->body, 384, -1);
+    gtk_container_add(GTK_CONTAINER(window_box), ctx->body);
 
     gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, INITIAL_QUESTION, NULL);
 

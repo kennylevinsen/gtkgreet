@@ -6,15 +6,25 @@
 #include "actions.h"
 #include "proto.h"
 #include "gtkgreet.h"
+#include "window.h"
 
 void action_answer_question(GtkWidget *widget, gpointer data) {
+    struct Window *ctx = data;
     struct response resp;
     switch (gtkgreet->question_type) {
         case QuestionTypeInitial: {
+            if (gtkgreet->selected_command) {
+                free(gtkgreet->selected_command);
+                gtkgreet->selected_command = NULL;
+            }
+            gtkgreet->selected_command = strdup(gtk_combo_box_text_get_active_text((GtkComboBoxText*)ctx->command_selector));
+
             struct request req = {
                 .request_type = request_type_create_session,
             };
-            strncpy(req.body.request_create_session.username, gtk_entry_get_text((GtkEntry*)widget), 127);
+            if (ctx->input_field != NULL) {
+                strncpy(req.body.request_create_session.username, gtk_entry_get_text((GtkEntry*)ctx->input_field), 127);
+            }
             resp = roundtrip(req);
             break;
         }
@@ -23,7 +33,9 @@ void action_answer_question(GtkWidget *widget, gpointer data) {
             struct request req = {
                 .request_type = request_type_post_auth_message_response,
             };
-            strncpy(req.body.request_post_auth_message_response.response, gtk_entry_get_text((GtkEntry*)widget), 127);
+            if (ctx->input_field != NULL) {
+                strncpy(req.body.request_post_auth_message_response.response, gtk_entry_get_text((GtkEntry*)ctx->input_field), 127);
+            }
             resp = roundtrip(req);
             break;
         }

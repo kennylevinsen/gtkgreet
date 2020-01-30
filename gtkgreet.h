@@ -1,8 +1,7 @@
 #ifndef _GTKGREET_H
 #define _GTKGREET_H
-#include <gtk/gtk.h>
 
-#include "window.h"
+#include <gtk/gtk.h>
 
 #define INITIAL_QUESTION "Username:"
 
@@ -13,6 +12,9 @@ enum QuestionType {
 	QuestionTypeInfo = 3,
 	QuestionTypeError = 4,
 };
+
+// Defined in window.h
+struct Window;
 
 struct GtkGreet {
     GtkApplication *app;
@@ -25,6 +27,7 @@ struct GtkGreet {
 #endif
     char* command;
 
+    char* selected_command;
     enum QuestionType question_type;
 };
 
