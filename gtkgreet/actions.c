@@ -76,7 +76,7 @@ void action_answer_question(GtkWidget *widget, gpointer data) {
         }
         case response_type_auth_message: {
             gtkgreet_setup_question(gtkgreet,
-                resp.body.response_auth_message.auth_message_type,
+                (enum QuestionType)resp.body.response_auth_message.auth_message_type,
                 resp.body.response_auth_message.auth_message,
                 NULL);
             break;
