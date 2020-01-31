@@ -65,7 +65,11 @@ void action_answer_question(GtkWidget *widget, gpointer data) {
 
             char* error = NULL;
             if (resp.response_type == response_type_error) {
-                error = resp.body.response_error.description;
+                if (resp.body.response_error.error_type == error_type_auth) {
+                    error = "Login failed";
+                } else {
+                    error = resp.body.response_error.description;
+                }
             }
             gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, INITIAL_QUESTION, error);
             break;
@@ -82,8 +86,17 @@ void action_answer_question(GtkWidget *widget, gpointer data) {
             struct request req = {
                 .request_type = request_type_cancel_session,
             };
+
+            char* error = NULL;
+            if (resp.response_type == response_type_error) {
+                if (resp.body.response_error.error_type == error_type_auth) {
+                    error = "Login failed";
+                } else {
+                    error = resp.body.response_error.description;
+                }
+            }
             roundtrip(req);
-            gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, INITIAL_QUESTION, resp.body.response_error.description);
+            gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, INITIAL_QUESTION, error);
             break;
         }
     }

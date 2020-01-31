@@ -79,13 +79,13 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
     }
     ctx->input_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     GtkWidget *question_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
-    gtk_widget_set_halign(question_box, GTK_ALIGN_CENTER);
+    gtk_widget_set_halign(question_box, GTK_ALIGN_END);
     switch (type) {
         case QuestionTypeInitial:
         case QuestionTypeVisible:
         case QuestionTypeSecret: {
             GtkWidget *label = gtk_label_new(question);
-            gtk_widget_set_halign(label, GTK_ALIGN_START);
+            gtk_widget_set_halign(label, GTK_ALIGN_END);
             gtk_container_add(GTK_CONTAINER(question_box), label);
 
             ctx->input_field = gtk_entry_new();
@@ -95,13 +95,14 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
             }
             g_signal_connect(ctx->input_field, "activate", G_CALLBACK(action_answer_question), ctx);
             gtk_widget_set_size_request(ctx->input_field, 384, -1);
+            gtk_widget_set_halign(ctx->input_field, GTK_ALIGN_END);
             gtk_container_add(GTK_CONTAINER(question_box), ctx->input_field);
             break;
         }
         case QuestionTypeInfo:
         case QuestionTypeError: {
             GtkWidget *label = gtk_label_new(question);
-            gtk_widget_set_halign(label, GTK_ALIGN_START);
+            gtk_widget_set_halign(label, GTK_ALIGN_END);
             gtk_container_add(GTK_CONTAINER(question_box), label);
             break;
         }
@@ -125,17 +126,18 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
 
     gtk_container_add(GTK_CONTAINER(ctx->body), ctx->input_box);
 
-    GtkWidget *bottom_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
-    gtk_widget_set_halign(bottom_box, GTK_ALIGN_END);
-    gtk_container_add(GTK_CONTAINER(ctx->input_box), bottom_box);
+    GtkWidget *button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    gtk_widget_set_halign(button_box, GTK_ALIGN_END);
+    gtk_container_add(GTK_CONTAINER(ctx->input_box), button_box);
+
 
     if (error != NULL) {
         GtkWidget *label = gtk_label_new(error);
         char err[128];
         snprintf(err, 128, "<span color=\"red\">%s</span>", error);
         gtk_label_set_markup((GtkLabel*)label, err);
-        gtk_widget_set_halign(label, GTK_ALIGN_START);
-        gtk_container_add(GTK_CONTAINER(bottom_box), label);
+        gtk_widget_set_halign(label, GTK_ALIGN_END);
+        gtk_container_add(GTK_CONTAINER(button_box), label);
     }
 
     GtkWidget *cancel_button = gtk_button_new_with_label("Cancel");
@@ -154,7 +156,7 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
     }
 
     gtk_widget_set_halign(cancel_button, GTK_ALIGN_END);
-    gtk_container_add(GTK_CONTAINER(bottom_box), cancel_button);
+    gtk_container_add(GTK_CONTAINER(button_box), cancel_button);
 
     GtkWidget *continue_button = gtk_button_new_with_label("Log in");
     g_signal_connect(continue_button, "clicked", G_CALLBACK(action_answer_question), ctx);
@@ -162,7 +164,7 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
     gtk_style_context_add_class(continue_button_style, "suggested-action");
 
     gtk_widget_set_halign(continue_button, GTK_ALIGN_END);
-    gtk_container_add(GTK_CONTAINER(bottom_box), continue_button);
+    gtk_container_add(GTK_CONTAINER(button_box), continue_button);
 
     gtk_widget_show_all(ctx->window);
 
