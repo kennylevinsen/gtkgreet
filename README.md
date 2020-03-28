@@ -2,43 +2,25 @@
 
 GTK based greeter for greetd, to be run under cage or similar.
 
+See the [wiki](https://man.sr.ht/~kennylevinsen/greetd) for FAQ, guides for common configurations, and troubleshooting information.
+
+
 ![screenshot](https://git.sr.ht/~kennylevinsen/gtkgreet/blob/master/assets/screenshot.png)
 
-## Example use
+## How to use
 
-1. Install the requirements:
+See the wiki.
 
-    1. greetd
-    2. cage
-    3. gtkgreet
-
-2. Set the greetd greeter to `cage gtkgreet` in `/etc/greetd/config.toml` like so:
-
-```
-vt = 2
-greeter = "cage gtkgreet"
-greeter_user = "greeter"
-```
-
-3. Add the environments you want to be able to run to `/etc/greetd/environments` like so:
-
-```
-sway
-bash
-```
-
-4. (Re-)start greetd.
-
-## How to build
-
-```
-meson build
-ninja -C build
-```
-
-## How to build with gtk-layer-shell
+## How to build with gtk-layer-shell (recommended)
 
 ```
 meson -Dlayershell=true build
+ninja -C build
+```
+
+## How to build without gtk-layer-shell
+
+```
+meson build
 ninja -C build
 ```
