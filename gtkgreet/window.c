@@ -224,14 +224,22 @@ static void window_destroy_notify(GtkWidget *widget, gpointer data) {
     gtkgreet_remove_window_by_widget(gtkgreet, widget);
 }
 
-
 void window_set_focus(struct Window* win) {
     assert(win != NULL);
     if (gtkgreet->focused_window != NULL && gtkgreet->focused_window != win) {
         struct Window* old = gtkgreet->focused_window;
         if (old->input_field != NULL && win->input_field != NULL) {
+            // Get previous cursor position
+            gint cursor_pos = 0;
+            g_object_get((GtkEntry*)old->input_field, "cursor-position", &cursor_pos, NULL);
+
+            // Move content
             gtk_entry_set_text((GtkEntry*)win->input_field, gtk_entry_get_text((GtkEntry*)old->input_field));
             gtk_entry_set_text((GtkEntry*)old->input_field, "");
+
+            // Update new cursor position
+            g_signal_emit_by_name((GtkEntry*)win->input_field, "move-cursor", GTK_MOVEMENT_BUFFER_ENDS, -1, FALSE);
+            g_signal_emit_by_name((GtkEntry*)win->input_field, "move-cursor", GTK_MOVEMENT_LOGICAL_POSITIONS, cursor_pos, FALSE);
         }
     }
 }
