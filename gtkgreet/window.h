@@ -21,9 +21,10 @@ struct Window {
     gulong enter_notify_handler;
 #endif
     guint draw_clock_source;
+    int show_inputs;
 };
 
-void create_window(GdkMonitor *monitor);
+struct Window *create_window(GdkMonitor *monitor);
 void window_configure(struct Window *win);
 void window_set_focus(struct Window *win);
 void window_setup_question(struct Window *ctx, enum QuestionType type, char* question, char* error);

@@ -44,7 +44,6 @@ static GOptionEntry entries[] =
                         break;
                     }
                 }
-                window_configure(w);
             } else {
                 create_window(monitor);
             }
@@ -60,12 +59,20 @@ static GOptionEntry entries[] =
             }
         }
 
+
         if (gtkgreet->focused_window == NULL &&
                 gtkgreet->windows->len > 0) {
             struct Window *w = g_array_index(gtkgreet->windows, struct Window*, gtkgreet->windows->len-1);
             assert(w != NULL);
-            window_set_focus(w);
+            gtkgreet->focused_window = w;
         }
+
+        for (guint idx = 0; idx < gtkgreet->windows->len; idx++) {
+            struct Window *win = g_array_index(gtkgreet->windows, struct Window*, idx);
+            win->show_inputs = win == gtkgreet->focused_window;
+            window_configure(win);
+        }
+
         g_array_unref(dead_windows);
     }
 
@@ -93,7 +100,8 @@ static GOptionEntry entries[] =
 static void activate(GtkApplication *app, gpointer user_data) {
     g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", TRUE, NULL);
     if (!setup_layer_shell()) {
-        create_window(NULL);
+        struct Window *win = create_window(NULL);
+        window_configure(win);
     }
 }
 
@@ -110,6 +118,7 @@ int main (int argc, char **argv) {
     gtkgreet = calloc(1, sizeof(struct GtkGreet));
     gtkgreet->windows = g_array_new(FALSE, TRUE, sizeof(struct Window*));
     gtkgreet->app = gtk_application_new("wtf.kl.gtkgreet", G_APPLICATION_FLAGS_NONE);
+    gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, INITIAL_QUESTION, NULL);
 
 #ifdef LAYER_SHELL
     gtkgreet->use_layer_shell = use_layer_shell;

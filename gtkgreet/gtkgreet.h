@@ -29,6 +29,8 @@ struct GtkGreet {
 
     char* selected_command;
     enum QuestionType question_type;
+    char *question;
+    char *error;
 };
 
 struct GtkGreet *gtkgreet;

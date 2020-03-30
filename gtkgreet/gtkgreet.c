@@ -39,8 +39,10 @@ void gtkgreet_remove_window_by_widget(struct GtkGreet *gtkgreet, GtkWidget *widg
 
 void gtkgreet_setup_question(struct GtkGreet *gtkgreet, enum QuestionType type, char* question, char* error) {
     gtkgreet->question_type = type;
+    gtkgreet->question = question;
+    gtkgreet->error = error;
     for (guint idx = 0; idx < gtkgreet->windows->len; idx++) {
         struct Window *ctx = g_array_index(gtkgreet->windows, struct Window*, idx);
-        window_setup_question(ctx, type, question, error);
+        window_configure(ctx);
     }
 }
