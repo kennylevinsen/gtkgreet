@@ -115,10 +115,7 @@ int main (int argc, char **argv) {
         exit(1);
     }
 
-    gtkgreet = calloc(1, sizeof(struct GtkGreet));
-    gtkgreet->windows = g_array_new(FALSE, TRUE, sizeof(struct Window*));
-    gtkgreet->app = gtk_application_new("wtf.kl.gtkgreet", G_APPLICATION_FLAGS_NONE);
-    gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, INITIAL_QUESTION, NULL);
+    gtkgreet = create_gtkgreet();
 
 #ifdef LAYER_SHELL
     gtkgreet->use_layer_shell = use_layer_shell;
@@ -128,8 +125,8 @@ int main (int argc, char **argv) {
     g_signal_connect(gtkgreet->app, "activate", G_CALLBACK(activate), NULL);
 
     int status = g_application_run(G_APPLICATION(gtkgreet->app), argc, argv);
-    g_object_unref(gtkgreet->app);
-    g_array_unref(gtkgreet->windows);
+
+    gtkgreet_destroy(gtkgreet);
 
     return status;
 }

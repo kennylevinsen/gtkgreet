@@ -57,23 +57,14 @@
 
 #endif
 
-static gboolean draw_clock(gpointer data) {
-    struct Window *ctx = (struct Window*)data;
-    time_t now = time(&now);
-    struct tm *now_tm = localtime(&now);
-    if (now_tm == NULL) {
-        return TRUE;
-    }
-
+void window_update_clock(struct Window *ctx) {
     char time[48];
+    int size = 96000;
     if (ctx->show_inputs) {
-        g_snprintf(time, 48, "<span size='24000'>%02d:%02d</span>", now_tm->tm_hour, now_tm->tm_min);
-    } else {
-        g_snprintf(time, 48, "<span size='64000'>%02d:%02d</span>", now_tm->tm_hour, now_tm->tm_min);
+        size = 32000;
     }
+    g_snprintf(time, 48, "<span size='%d'>%s</span>", size, gtkgreet->time);
     gtk_label_set_markup((GtkLabel*)ctx->clock_label, time);
-
-    return TRUE;
 }
 
 void window_setup_question(struct Window *ctx, enum QuestionType type, char* question, char* error) {
@@ -142,7 +133,6 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
     gtk_widget_set_halign(button_box, GTK_ALIGN_END);
     gtk_container_add(GTK_CONTAINER(ctx->input_box), button_box);
 
-
     if (error != NULL) {
         GtkWidget *label = gtk_label_new(error);
         char err[128];
@@ -191,10 +181,6 @@ static void window_empty(struct Window *ctx) {
         gtk_widget_destroy(GTK_WIDGET(iter->data));
     }
     g_list_free(children);
-    if (ctx->draw_clock_source > 0) {
-        g_source_remove(ctx->draw_clock_source);
-        ctx->draw_clock_source = 0;
-    }
 
     ctx->body = NULL;
     ctx->input_box = NULL;
@@ -220,8 +206,7 @@ static void window_setup(struct Window *ctx) {
     ctx->clock_label = gtk_label_new("");
     g_object_set(ctx->clock_label, "margin-bottom", 10, NULL);
     gtk_container_add(GTK_CONTAINER(window_box), ctx->clock_label);
-    ctx->draw_clock_source = g_timeout_add_seconds(5, draw_clock, ctx);
-    draw_clock(ctx);
+    window_update_clock(ctx);
 
     if (ctx->show_inputs) {
         ctx->body = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
