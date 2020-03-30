@@ -67,6 +67,7 @@ static GOptionEntry entries[] =
             assert(w != NULL);
             window_set_focus(w);
         }
+        g_array_unref(dead_windows);
     }
 
     static void monitors_changed(GdkDisplay *display, GdkMonitor *monitor) {
@@ -120,6 +121,7 @@ int main (int argc, char **argv) {
 
     int status = g_application_run(G_APPLICATION(gtkgreet->app), argc, argv);
     g_object_unref(gtkgreet->app);
+    g_array_unref(gtkgreet->windows);
 
     return status;
 }
