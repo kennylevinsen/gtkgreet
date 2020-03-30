@@ -33,9 +33,13 @@
         return FALSE;
     }
 
-    static void window_setup_layershell(struct Window *ctx, GdkMonitor *monitor) {
+    static void window_setup_layershell(struct Window *ctx) {
             gtk_widget_add_events(ctx->window, GDK_ENTER_NOTIFY_MASK);
-        g_signal_connect(ctx->window, "enter-notify-event", G_CALLBACK(window_enter_notify), NULL);
+        if (ctx->enter_notify_handler > 0) {
+            g_signal_handler_disconnect(ctx->window, ctx->enter_notify_handler);
+            ctx->enter_notify_handler = 0;
+        }
+        ctx->enter_notify_handler = g_signal_connect(ctx->window, "enter-notify-event", G_CALLBACK(window_enter_notify), NULL);
 
         gtk_layer_init_for_window(GTK_WINDOW(ctx->window));
         gtk_layer_set_layer(GTK_WINDOW(ctx->window), GTK_LAYER_SHELL_LAYER_TOP);
@@ -47,7 +51,7 @@
         gtk_layer_set_margin(GTK_WINDOW(ctx->window), GTK_LAYER_SHELL_EDGE_BOTTOM, 0);
 
         GdkRectangle rect;
-        gdk_monitor_get_workarea(monitor, &rect);
+        gdk_monitor_get_workarea(ctx->monitor, &rect);
         gtk_widget_set_size_request(ctx->window, rect.width, rect.height);
     }
 
@@ -214,6 +218,16 @@ void window_set_focus(struct Window* win) {
     }
 }
 
+static void window_configure(struct Window *w) {
+#ifdef LAYER_SHELL
+    if (gtkgreet->use_layer_shell) {
+        window_setup_layershell(w);
+    }
+#endif
+
+    window_setup(w);
+}
+
 void create_window(GdkMonitor *monitor) {
     struct Window *w = calloc(1, sizeof(struct Window));
     if (w == NULL) {
@@ -228,11 +242,5 @@ void create_window(GdkMonitor *monitor) {
     gtk_window_set_title(GTK_WINDOW(w->window), "Greeter");
     gtk_window_set_default_size(GTK_WINDOW(w->window), 200, 200);
 
-#ifdef LAYER_SHELL
-    if (gtkgreet->use_layer_shell) {
-        window_setup_layershell(w, monitor);
-    }
-#endif
-
-    window_setup(w);
+    window_configure(w);
 }

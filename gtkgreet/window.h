@@ -16,6 +16,10 @@ struct Window {
     GtkWidget *command_selector;
     GtkWidget *info_label;
     GtkWidget *clock_label;
+
+#ifdef LAYER_SHELL
+    gulong enter_notify_handler;
+#endif
 };
 
 void create_window(GdkMonitor *monitor);
