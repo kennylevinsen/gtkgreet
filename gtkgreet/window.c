@@ -226,6 +226,7 @@ static void window_setup(struct Window *ctx) {
 }
 
 static void window_destroy_notify(GtkWidget *widget, gpointer data) {
+    window_empty(gtkgreet_window_by_widget(gtkgreet, widget));
     gtkgreet_remove_window_by_widget(gtkgreet, widget);
 }
 
