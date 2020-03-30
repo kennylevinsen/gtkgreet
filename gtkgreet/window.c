@@ -177,7 +177,25 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
     }
 }
 
+static void window_empty(struct Window *ctx) {
+    GList *children = gtk_container_get_children(GTK_CONTAINER(ctx->window));
+    for (GList *iter = children; iter != NULL; iter = g_list_next(iter)) {
+        gtk_widget_destroy(GTK_WIDGET(iter->data));
+    }
+    g_list_free(children);
+    ctx->body = NULL;
+    ctx->input_box = NULL;
+    ctx->input_field = NULL;
+    ctx->command_selector = NULL;
+    ctx->info_label = NULL;
+    ctx->clock_label = NULL;
+}
+
 static void window_setup(struct Window *ctx) {
+    // Clean up old elements
+    window_empty(ctx);
+
+    // Create new elements
     GtkWidget *window_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     g_object_set(window_box, "margin-bottom", 100, NULL);
     g_object_set(window_box, "margin-top", 100, NULL);
