@@ -183,6 +183,11 @@ static void window_empty(struct Window *ctx) {
         gtk_widget_destroy(GTK_WIDGET(iter->data));
     }
     g_list_free(children);
+    if (ctx->draw_clock_source > 0) {
+        g_source_remove(ctx->draw_clock_source);
+        ctx->draw_clock_source = 0;
+    }
+
     ctx->body = NULL;
     ctx->input_box = NULL;
     ctx->input_field = NULL;
@@ -207,7 +212,7 @@ static void window_setup(struct Window *ctx) {
     ctx->clock_label = gtk_label_new("");
     g_object_set(ctx->clock_label, "margin-bottom", 10, NULL);
     gtk_container_add(GTK_CONTAINER(window_box), ctx->clock_label);
-    g_timeout_add(5000, draw_clock, ctx);
+    ctx->draw_clock_source = g_timeout_add_seconds(5, draw_clock, ctx);
     draw_clock(ctx);
 
     ctx->body = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);

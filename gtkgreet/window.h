@@ -20,6 +20,7 @@ struct Window {
 #ifdef LAYER_SHELL
     gulong enter_notify_handler;
 #endif
+    guint draw_clock_source;
 };
 
 void create_window(GdkMonitor *monitor);
