@@ -250,7 +250,7 @@ void window_set_focus(struct Window* win) {
     }
 }
 
-static void window_configure(struct Window *w) {
+void window_configure(struct Window *w) {
 #ifdef LAYER_SHELL
     if (gtkgreet->use_layer_shell) {
         window_setup_layershell(w);

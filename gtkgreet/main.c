@@ -37,18 +37,17 @@ static GOptionEntry entries[] =
             GdkMonitor *monitor = gdk_display_get_monitor(display, i);
             struct Window *w = gtkgreet_window_by_monitor(gtkgreet, monitor);
             if (w != NULL) {
-                // We already have this monitor, remove from dead_windows list and
-                // go to the next monitor.
+                // We already have this monitor, remove from dead_windows list
                 for (guint ydx = 0; ydx < dead_windows->len; ydx++) {
                     if (w == g_array_index(dead_windows, struct Window*, ydx)) {
                         g_array_remove_index_fast(dead_windows, ydx);
                         break;
                     }
                 }
-                continue;
+                window_configure(w);
+            } else {
+                create_window(monitor);
             }
-
-            create_window(monitor);
         }
 
         // Remove all windows left behind
