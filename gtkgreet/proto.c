@@ -153,9 +153,6 @@ struct response roundtrip(struct request req) {
         struct json_object* cmd = json_object_new_array();
         json_object_array_add(cmd, json_object_new_string(req.body.request_start_session.cmd));
         json_object_object_add(json_req, "cmd", cmd);
-
-        struct json_object* env = json_object_new_array();
-        json_object_object_add(json_req, "env", env);
         break;
     }
     case request_type_post_auth_message_response: {
