@@ -52,24 +52,14 @@ static GOptionEntry entries[] =
         // Remove all windows left behind
         for (guint idx = 0; idx < dead_windows->len; idx++) {
             struct Window *w = g_array_index(dead_windows, struct Window*, idx);
-            fprintf(stderr, "deleting window %p\n", w);
             gtk_widget_destroy(w->window);
             if (gtkgreet->focused_window == w) {
                 gtkgreet->focused_window = NULL;
             }
         }
 
-
-        if (gtkgreet->focused_window == NULL &&
-                gtkgreet->windows->len > 0) {
-            struct Window *w = g_array_index(gtkgreet->windows, struct Window*, gtkgreet->windows->len-1);
-            assert(w != NULL);
-            gtkgreet->focused_window = w;
-        }
-
         for (guint idx = 0; idx < gtkgreet->windows->len; idx++) {
             struct Window *win = g_array_index(gtkgreet->windows, struct Window*, idx);
-            win->show_inputs = win == gtkgreet->focused_window;
             window_configure(win);
         }
 
@@ -101,6 +91,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
     g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", TRUE, NULL);
     if (!setup_layer_shell()) {
         struct Window *win = create_window(NULL);
+        gtkgreet_focus_window(gtkgreet, win);
         window_configure(win);
     }
 }

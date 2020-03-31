@@ -9,27 +9,21 @@
 #include "actions.h"
 #include "config.h"
 
+static void window_set_focus(struct Window *win, struct Window *old);
+
 #ifdef LAYER_SHELL
 #   include <gtk-layer-shell.h>
 
-    static void window_set_focus_layer_shell(struct Window *win) {
-        if (gtkgreet->focused_window != NULL) {
-            gtk_layer_set_keyboard_interactivity(GTK_WINDOW(gtkgreet->focused_window->window), FALSE);
+    static void window_set_focus_layer_shell(struct Window *win, struct Window *old) {
+        if (old != NULL) {
+            gtk_layer_set_keyboard_interactivity(GTK_WINDOW(old->window), FALSE);
         }
         gtk_layer_set_keyboard_interactivity(GTK_WINDOW(win->window), TRUE);
     }
 
     static gboolean window_enter_notify(GtkWidget *widget, gpointer data) {
         struct Window *win = gtkgreet_window_by_widget(gtkgreet, widget);
-        if (win == NULL)
-            return FALSE;
-
-        if (win != gtkgreet->focused_window) {
-            window_set_focus_layer_shell(win);
-            window_set_focus(win);
-        }
-
-        gtkgreet->focused_window = win;
+        gtkgreet_focus_window(gtkgreet, win);
         return FALSE;
     }
 
@@ -60,7 +54,7 @@
 void window_update_clock(struct Window *ctx) {
     char time[48];
     int size = 96000;
-    if (ctx->show_inputs) {
+    if (ctx == gtkgreet->focused_window) {
         size = 32000;
     }
     g_snprintf(time, 48, "<span size='%d'>%s</span>", size, gtkgreet->time);
@@ -68,7 +62,7 @@ void window_update_clock(struct Window *ctx) {
 }
 
 void window_setup_question(struct Window *ctx, enum QuestionType type, char* question, char* error) {
-    if (!ctx->show_inputs) {
+    if (ctx != gtkgreet->focused_window) {
         return;
     }
 
@@ -208,7 +202,7 @@ static void window_setup(struct Window *ctx) {
     gtk_container_add(GTK_CONTAINER(window_box), ctx->clock_label);
     window_update_clock(ctx);
 
-    if (ctx->show_inputs) {
+    if (ctx == gtkgreet->focused_window) {
         ctx->body = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
         gtk_widget_set_halign(ctx->body, GTK_ALIGN_CENTER);
         gtk_widget_set_size_request(ctx->body, 384, -1);
@@ -223,15 +217,12 @@ static void window_destroy_notify(GtkWidget *widget, gpointer data) {
     gtkgreet_remove_window_by_widget(gtkgreet, widget);
 }
 
-void window_set_focus(struct Window* win) {
+static void window_set_focus(struct Window *win, struct Window *old) {
     assert(win != NULL);
-    assert(win != gtkgreet->focused_window);
 
-    win->show_inputs = 1;
     window_setup(win);
 
-    if (gtkgreet->focused_window != NULL) {
-        struct Window* old = gtkgreet->focused_window;
+    if (old != NULL) {
         if (old->input_field != NULL && win->input_field != NULL) {
             // Get previous cursor position
             gint cursor_pos = 0;
@@ -245,11 +236,19 @@ void window_set_focus(struct Window* win) {
             g_signal_emit_by_name((GtkEntry*)win->input_field, "move-cursor", GTK_MOVEMENT_BUFFER_ENDS, -1, FALSE);
             g_signal_emit_by_name((GtkEntry*)win->input_field, "move-cursor", GTK_MOVEMENT_LOGICAL_POSITIONS, cursor_pos, FALSE);
         }
-        old->show_inputs = 0;
         window_setup(old);
         gtk_widget_show_all(old->window);
     }
     gtk_widget_show_all(win->window);
+}
+
+void window_swap_focus(struct Window *win, struct Window *old) {
+#ifdef LAYER_SHELL
+    if (gtkgreet->use_layer_shell) {
+        window_set_focus_layer_shell(win, old);
+    }
+#endif
+    window_set_focus(win, old);
 }
 
 void window_configure(struct Window *w) {
@@ -269,7 +268,6 @@ struct Window *create_window(GdkMonitor *monitor) {
         fprintf(stderr, "failed to allocate Window instance\n");
         exit(1);
     }
-    w->show_inputs = 1;
     w->monitor = monitor;
     g_array_append_val(gtkgreet->windows, w);
 

@@ -37,6 +37,12 @@ void gtkgreet_remove_window_by_widget(struct GtkGreet *gtkgreet, GtkWidget *widg
     }
 }
 
+void gtkgreet_focus_window(struct GtkGreet *gtkgreet, struct Window* win) {
+    struct Window *old = gtkgreet->focused_window;
+    gtkgreet->focused_window = win;
+    window_swap_focus(win, old);
+}
+
 void gtkgreet_setup_question(struct GtkGreet *gtkgreet, enum QuestionType type, char* question, char* error) {
     gtkgreet->question_type = type;
     gtkgreet->question = question;
