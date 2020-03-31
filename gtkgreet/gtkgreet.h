@@ -44,6 +44,7 @@ void gtkgreet_focus_window(struct GtkGreet *gtkgreet, struct Window* win);
 void gtkgreet_setup_question(struct GtkGreet *gtkgreet, enum QuestionType type, char* question, char* error);
 void gtkgreet_update_clocks(struct GtkGreet *gtkgreet);
 struct GtkGreet* create_gtkgreet();
+void gtkgreet_activate(struct GtkGreet *gtkgreet);
 void gtkgreet_destroy(struct GtkGreet *gtkgreet);
 
 #endif

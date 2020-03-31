@@ -10,11 +10,12 @@ struct Window {
     GdkMonitor *monitor;
 
     GtkWidget *window;
+    GtkWidget *revealer;
+    GtkWidget *window_box;
     GtkWidget *body;
     GtkWidget *input_box;
     GtkWidget *input_field;
     GtkWidget *command_selector;
-    GtkWidget *info_label;
     GtkWidget *clock_label;
 
 #ifdef LAYER_SHELL

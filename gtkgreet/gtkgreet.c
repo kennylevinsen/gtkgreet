@@ -41,6 +41,10 @@ void gtkgreet_focus_window(struct GtkGreet *gtkgreet, struct Window* win) {
     struct Window *old = gtkgreet->focused_window;
     gtkgreet->focused_window = win;
     window_swap_focus(win, old);
+    for (guint idx = 0; idx < gtkgreet->windows->len; idx++) {
+        struct Window *ctx = g_array_index(gtkgreet->windows, struct Window*, idx);
+        window_configure(ctx);
+    }
 }
 
 void gtkgreet_setup_question(struct GtkGreet *gtkgreet, enum QuestionType type, char* question, char* error) {
@@ -74,12 +78,15 @@ static int gtkgreet_update_clocks_handler(gpointer data) {
 
 struct GtkGreet* create_gtkgreet() {
     gtkgreet = calloc(1, sizeof(struct GtkGreet));
-    gtkgreet->windows = g_array_new(FALSE, TRUE, sizeof(struct Window*));
     gtkgreet->app = gtk_application_new("wtf.kl.gtkgreet", G_APPLICATION_FLAGS_NONE);
+    gtkgreet->windows = g_array_new(FALSE, TRUE, sizeof(struct Window*));
+    return gtkgreet;
+}
+
+void gtkgreet_activate(struct GtkGreet *gtkgreet) {
     gtkgreet->draw_clock_source = g_timeout_add_seconds(5, gtkgreet_update_clocks_handler, gtkgreet);
     gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, INITIAL_QUESTION, NULL);
     gtkgreet_update_clocks(gtkgreet);
-    return gtkgreet;
 }
 
 void gtkgreet_destroy(struct GtkGreet *gtkgreet) {

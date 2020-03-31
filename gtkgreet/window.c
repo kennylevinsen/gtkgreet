@@ -54,7 +54,7 @@ static void window_set_focus(struct Window *win, struct Window *old);
 void window_update_clock(struct Window *ctx) {
     char time[48];
     int size = 96000;
-    if (ctx == gtkgreet->focused_window) {
+    if (gtkgreet->focused_window == NULL || ctx == gtkgreet->focused_window) {
         size = 32000;
     }
     g_snprintf(time, 48, "<span size='%d'>%s</span>", size, gtkgreet->time);
@@ -62,7 +62,7 @@ void window_update_clock(struct Window *ctx) {
 }
 
 void window_setup_question(struct Window *ctx, enum QuestionType type, char* question, char* error) {
-    if (ctx != gtkgreet->focused_window) {
+    if (gtkgreet->focused_window != NULL && ctx != gtkgreet->focused_window) {
         return;
     }
 
@@ -170,45 +170,65 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
 }
 
 static void window_empty(struct Window *ctx) {
-    GList *children = gtk_container_get_children(GTK_CONTAINER(ctx->window));
-    for (GList *iter = children; iter != NULL; iter = g_list_next(iter)) {
-        gtk_widget_destroy(GTK_WIDGET(iter->data));
+    if (ctx->revealer != NULL) {
+        gtk_widget_destroy(ctx->revealer);
+        ctx->revealer = NULL;
     }
-    g_list_free(children);
 
+    ctx->window_box = NULL;
+    ctx->clock_label = NULL;
     ctx->body = NULL;
     ctx->input_box = NULL;
     ctx->input_field = NULL;
     ctx->command_selector = NULL;
-    ctx->info_label = NULL;
-    ctx->clock_label = NULL;
 }
 
 static void window_setup(struct Window *ctx) {
-    // Clean up old elements
-    window_empty(ctx);
+    // Create general structure if it is missing
+    if (ctx->revealer == NULL) {
+        ctx->revealer = gtk_revealer_new();
+        g_object_set(ctx->revealer, "margin-bottom", 100, NULL);
+        g_object_set(ctx->revealer, "margin-top", 100, NULL);
+        g_object_set(ctx->revealer, "margin-left", 100, NULL);
+        g_object_set(ctx->revealer, "margin-right", 100, NULL);
+        gtk_widget_set_valign(ctx->revealer, GTK_ALIGN_CENTER);
+        gtk_container_add(GTK_CONTAINER(ctx->window), ctx->revealer);
+        gtk_revealer_set_transition_type(GTK_REVEALER(ctx->revealer), GTK_REVEALER_TRANSITION_TYPE_NONE);
+        gtk_revealer_set_reveal_child(GTK_REVEALER(ctx->revealer), FALSE);
+        gtk_revealer_set_transition_duration(GTK_REVEALER(ctx->revealer), 750);
+    }
 
-    // Create new elements
-    GtkWidget *window_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    g_object_set(window_box, "margin-bottom", 100, NULL);
-    g_object_set(window_box, "margin-top", 100, NULL);
-    g_object_set(window_box, "margin-left", 100, NULL);
-    g_object_set(window_box, "margin-right", 100, NULL);
-    gtk_container_add(GTK_CONTAINER(ctx->window), window_box);
-    gtk_widget_set_valign(window_box, GTK_ALIGN_CENTER);
+    if (ctx->window_box == NULL) {
+        ctx->window_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+        gtk_container_add(GTK_CONTAINER(ctx->revealer), ctx->window_box);
 
-    ctx->clock_label = gtk_label_new("");
-    g_object_set(ctx->clock_label, "margin-bottom", 10, NULL);
-    gtk_container_add(GTK_CONTAINER(window_box), ctx->clock_label);
-    window_update_clock(ctx);
+        ctx->clock_label = gtk_label_new("");
+        g_object_set(ctx->clock_label, "margin-bottom", 10, NULL);
+        gtk_container_add(GTK_CONTAINER(ctx->window_box), ctx->clock_label);
+        window_update_clock(ctx);
+    }
 
-    if (ctx == gtkgreet->focused_window) {
+    // Update input area if necessary
+    if (gtkgreet->focused_window == NULL || (ctx == gtkgreet->focused_window && ctx->body == NULL)) {
         ctx->body = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
         gtk_widget_set_halign(ctx->body, GTK_ALIGN_CENTER);
         gtk_widget_set_size_request(ctx->body, 384, -1);
-        gtk_container_add(GTK_CONTAINER(window_box), ctx->body);
+        gtk_container_add(GTK_CONTAINER(ctx->window_box), ctx->body);
 
         window_setup_question(ctx, gtkgreet->question_type, gtkgreet->question, gtkgreet->error);
+        window_update_clock(ctx);
+    } else if (ctx != gtkgreet->focused_window && ctx->body != NULL) {
+        gtk_widget_destroy(ctx->body);
+        ctx->body = NULL;
+        ctx->input_box = NULL;
+        ctx->input_field = NULL;
+        ctx->command_selector = NULL;
+        window_update_clock(ctx);
+    }
+
+    if (ctx->revealer != NULL) {
+        gtk_revealer_set_transition_type(GTK_REVEALER(ctx->revealer), GTK_REVEALER_TRANSITION_TYPE_CROSSFADE);
+        gtk_revealer_set_reveal_child(GTK_REVEALER(ctx->revealer), TRUE);
     }
 }
 
@@ -222,7 +242,7 @@ static void window_set_focus(struct Window *win, struct Window *old) {
 
     window_setup(win);
 
-    if (old != NULL) {
+    if (old != NULL && old != win) {
         if (old->input_field != NULL && win->input_field != NULL) {
             // Get previous cursor position
             gint cursor_pos = 0;

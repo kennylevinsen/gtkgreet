@@ -88,6 +88,7 @@ static GOptionEntry entries[] =
 #endif
 
 static void activate(GtkApplication *app, gpointer user_data) {
+    gtkgreet_activate(gtkgreet);
     g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", TRUE, NULL);
     if (!setup_layer_shell()) {
         struct Window *win = create_window(NULL);
