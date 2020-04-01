@@ -49,12 +49,11 @@ static void handle_response(struct response resp, int start_req) {
             roundtrip(req);
 
             char* error = NULL;
-            if (resp.response_type == response_type_error) {
-                if (resp.body.response_error.error_type == error_type_auth) {
-                    error = "Login failed";
-                } else {
-                    error = resp.body.response_error.description;
-                }
+            if (resp.response_type == response_type_error &&
+                resp.body.response_error.error_type == error_type_auth) {
+                error = "Login failed";
+            } else {
+                error = resp.body.response_error.description;
             }
             gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, INITIAL_QUESTION, error);
             break;

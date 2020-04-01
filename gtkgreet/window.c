@@ -211,21 +211,20 @@ static void window_setup(struct Window *ctx) {
     }
 
     // Update input area if necessary
-    if (gtkgreet->focused_window == NULL || (ctx == gtkgreet->focused_window && ctx->body == NULL)) {
-        ctx->body = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-        gtk_widget_set_halign(ctx->body, GTK_ALIGN_CENTER);
-        gtk_widget_set_size_request(ctx->body, 384, -1);
-        gtk_container_add(GTK_CONTAINER(ctx->window_box), ctx->body);
-
+    if (gtkgreet->focused_window == ctx || gtkgreet->focused_window == NULL) {
+        if (ctx->body == NULL) {
+            ctx->body = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+            gtk_widget_set_halign(ctx->body, GTK_ALIGN_CENTER);
+            gtk_widget_set_size_request(ctx->body, 384, -1);
+            gtk_container_add(GTK_CONTAINER(ctx->window_box), ctx->body);
+        }
         window_setup_question(ctx, gtkgreet->question_type, gtkgreet->question, gtkgreet->error);
-        window_update_clock(ctx);
-    } else if (ctx != gtkgreet->focused_window && ctx->body != NULL) {
+    } else if (ctx->body != NULL) {
         gtk_widget_destroy(ctx->body);
         ctx->body = NULL;
         ctx->input_box = NULL;
         ctx->input_field = NULL;
         ctx->command_selector = NULL;
-        window_update_clock(ctx);
     }
 
     if (ctx->revealer != NULL) {
