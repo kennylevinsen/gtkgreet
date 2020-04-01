@@ -1,3 +1,5 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include <json-c/json_object.h>
 #include <json-c/json_tokener.h>
 
