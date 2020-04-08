@@ -6,6 +6,8 @@
 #include "window.h"
 #include "gtkgreet.h"
 
+struct GtkGreet *gtkgreet = NULL;
+
 static char* command = NULL;
 
 #ifdef LAYER_SHELL

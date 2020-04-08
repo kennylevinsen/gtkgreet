@@ -35,7 +35,7 @@ struct GtkGreet {
     char time[8];
 };
 
-struct GtkGreet *gtkgreet;
+extern struct GtkGreet *gtkgreet;
 
 struct Window* gtkgreet_window_by_widget(struct GtkGreet *gtkgreet, GtkWidget *window);
 struct Window* gtkgreet_window_by_monitor(struct GtkGreet *gtkgreet, GdkMonitor *monitor);
