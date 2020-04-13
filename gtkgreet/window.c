@@ -219,12 +219,14 @@ static void window_setup(struct Window *ctx) {
             gtk_container_add(GTK_CONTAINER(ctx->window_box), ctx->body);
         }
         window_setup_question(ctx, gtkgreet->question_type, gtkgreet->question, gtkgreet->error);
+        window_update_clock(ctx);
     } else if (ctx->body != NULL) {
         gtk_widget_destroy(ctx->body);
         ctx->body = NULL;
         ctx->input_box = NULL;
         ctx->input_field = NULL;
         ctx->command_selector = NULL;
+        window_update_clock(ctx);
     }
 
     if (ctx->revealer != NULL) {
