@@ -50,9 +50,19 @@ void gtkgreet_focus_window(struct GtkGreet *gtkgreet, struct Window* win) {
 }
 
 void gtkgreet_setup_question(struct GtkGreet *gtkgreet, enum QuestionType type, char* question, char* error) {
+    if (gtkgreet->question != NULL) {
+        free(gtkgreet->question);
+        gtkgreet->question = NULL;
+    }
+    if (gtkgreet->error != NULL) {
+        free(gtkgreet->error);
+        gtkgreet->error = NULL;
+    }
     gtkgreet->question_type = type;
-    gtkgreet->question = question;
-    gtkgreet->error = error;
+    if (question != NULL)
+        gtkgreet->question = strdup(question);
+    if (error != NULL)
+        gtkgreet->error = strdup(error);
     for (guint idx = 0; idx < gtkgreet->windows->len; idx++) {
         struct Window *ctx = g_array_index(gtkgreet->windows, struct Window*, idx);
         window_configure(ctx);
@@ -92,6 +102,15 @@ void gtkgreet_activate(struct GtkGreet *gtkgreet) {
 }
 
 void gtkgreet_destroy(struct GtkGreet *gtkgreet) {
+    if (gtkgreet->question != NULL) {
+        free(gtkgreet->question);
+        gtkgreet->question = NULL;
+    }
+    if (gtkgreet->error != NULL) {
+        free(gtkgreet->error);
+        gtkgreet->error = NULL;
+    }
+
     g_object_unref(gtkgreet->app);
     g_array_unref(gtkgreet->windows);
 
