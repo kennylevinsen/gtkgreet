@@ -63,6 +63,7 @@ void gtkgreet_setup_question(struct GtkGreet *gtkgreet, enum QuestionType type, 
         gtkgreet->question = strdup(question);
     if (error != NULL)
         gtkgreet->error = strdup(error);
+    gtkgreet->question_cnt += 1;
     for (guint idx = 0; idx < gtkgreet->windows->len; idx++) {
         struct Window *ctx = g_array_index(gtkgreet->windows, struct Window*, idx);
         window_configure(ctx);
@@ -92,6 +93,7 @@ struct GtkGreet* create_gtkgreet() {
     gtkgreet = calloc(1, sizeof(struct GtkGreet));
     gtkgreet->app = gtk_application_new("wtf.kl.gtkgreet", G_APPLICATION_FLAGS_NONE);
     gtkgreet->windows = g_array_new(FALSE, TRUE, sizeof(struct Window*));
+    gtkgreet->question_cnt = 1;
     return gtkgreet;
 }
 

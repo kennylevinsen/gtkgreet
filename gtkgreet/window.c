@@ -69,6 +69,10 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
     }
 
     if (ctx->input_box != NULL) {
+        if (gtkgreet->question_cnt == ctx->question_cnt) {
+            return;
+        }
+
         gtk_widget_destroy(ctx->input_box);
         ctx->input_box = NULL;
 
@@ -233,6 +237,8 @@ static void window_setup(struct Window *ctx) {
         gtk_revealer_set_transition_type(GTK_REVEALER(ctx->revealer), GTK_REVEALER_TRANSITION_TYPE_CROSSFADE);
         gtk_revealer_set_reveal_child(GTK_REVEALER(ctx->revealer), TRUE);
     }
+
+    ctx->question_cnt = gtkgreet->question_cnt;
 }
 
 static void window_destroy_notify(GtkWidget *widget, gpointer data) {
@@ -258,6 +264,9 @@ static void window_set_focus(struct Window *win, struct Window *old) {
             // Update new cursor position
             g_signal_emit_by_name((GtkEntry*)win->input_field, "move-cursor", GTK_MOVEMENT_BUFFER_ENDS, -1, FALSE);
             g_signal_emit_by_name((GtkEntry*)win->input_field, "move-cursor", GTK_MOVEMENT_LOGICAL_POSITIONS, cursor_pos, FALSE);
+        }
+        if (old->command_selector != NULL && win->command_selector != NULL) {
+            gtk_combo_box_set_active((GtkComboBox*)win->command_selector, gtk_combo_box_get_active((GtkComboBox*)old->command_selector));
         }
         window_setup(old);
         gtk_widget_show_all(old->window);

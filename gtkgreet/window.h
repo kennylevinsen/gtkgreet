@@ -21,6 +21,8 @@ struct Window {
 #ifdef LAYER_SHELL
     gulong enter_notify_handler;
 #endif
+
+    int question_cnt;
 };
 
 struct Window *create_window(GdkMonitor *monitor);

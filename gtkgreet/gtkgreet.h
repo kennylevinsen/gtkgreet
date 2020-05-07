@@ -33,6 +33,7 @@ struct GtkGreet {
     char *question;
     char *error;
     char time[8];
+    int question_cnt;
 };
 
 extern struct GtkGreet *gtkgreet;
