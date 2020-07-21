@@ -142,23 +142,20 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
         gtk_container_add(GTK_CONTAINER(button_box), label);
     }
 
-    GtkWidget *cancel_button = gtk_button_new_with_label("Cancel");
     switch (type) {
-        case QuestionTypeInitial: {
-            g_signal_connect(cancel_button, "clicked", G_CALLBACK(action_quit), ctx);
-            break;
-        }
         case QuestionTypeVisible:
         case QuestionTypeSecret:
         case QuestionTypeInfo:
         case QuestionTypeError: {
+            GtkWidget *cancel_button = gtk_button_new_with_label("Cancel");
+            gtk_widget_set_halign(cancel_button, GTK_ALIGN_END);
+            gtk_container_add(GTK_CONTAINER(button_box), cancel_button);
             g_signal_connect(cancel_button, "clicked", G_CALLBACK(action_cancel_question), ctx);
             break;
         }
+        case QuestionTypeInitial:
+            break;
     }
-
-    gtk_widget_set_halign(cancel_button, GTK_ALIGN_END);
-    gtk_container_add(GTK_CONTAINER(button_box), cancel_button);
 
     GtkWidget *continue_button = gtk_button_new_with_label("Log in");
     g_signal_connect(continue_button, "clicked", G_CALLBACK(action_answer_question), ctx);

@@ -103,9 +103,6 @@ void action_answer_question(GtkWidget *widget, gpointer data) {
     }
 }
 
-void action_quit(GtkWidget *widget, gpointer data) {
-    exit(0);
-}
 void action_cancel_question(GtkWidget *widget, gpointer data) {
     struct request req = {
         .request_type = request_type_cancel_session,
