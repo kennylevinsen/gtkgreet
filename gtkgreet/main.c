@@ -9,6 +9,7 @@
 struct GtkGreet *gtkgreet = NULL;
 
 static char* command = NULL;
+static char* background = NULL;
 
 #ifdef LAYER_SHELL
 static gboolean use_layer_shell = FALSE;
@@ -21,7 +22,7 @@ static GOptionEntry entries[] =
   { "layer-shell", 'l', 0, G_OPTION_ARG_NONE, &use_layer_shell, "Use layer shell", NULL},
   { "command", 'c', 0, G_OPTION_ARG_STRING, &command, "Command to run", "sway"},
 #endif
-
+  { "background", 'b', 0, G_OPTION_ARG_STRING, &background, "Background image to use", NULL},
   { NULL }
 };
 
@@ -117,6 +118,13 @@ int main (int argc, char **argv) {
     gtkgreet->use_layer_shell = use_layer_shell;
 #endif
     gtkgreet->command = command;
+
+    if (background != NULL) {
+        gtkgreet->background = gdk_pixbuf_new_from_file(background, &error);
+        if (gtkgreet->background == NULL) {
+            g_print("background loading failed: %s\n", error->message);
+        }
+    }
 
     g_signal_connect(gtkgreet->app, "activate", G_CALLBACK(activate), NULL);
 
