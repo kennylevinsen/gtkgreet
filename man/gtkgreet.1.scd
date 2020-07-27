@@ -21,6 +21,11 @@ gtkgreet - A Gtk-based greeter for greetd
 	Use wlr-layer-shell to display a window on every output. Must be enabled at
 	compile-time.
 
+*-b, --background*
+	Specifies a background image to be used by gtkgreet. JPG and PNG are known
+	to work. The image will be anchored to the upper left corner, and is
+	rendered 1:1 when DPI scaling is 1.
+
 # DESCRIPTION
 
 gtkgreet is a Gtk-based, graphical greeter for *greetd*(1).
