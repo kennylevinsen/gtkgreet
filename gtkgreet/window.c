@@ -41,14 +41,10 @@ static void window_set_focus(struct Window *win, struct Window *old);
         gtk_layer_set_layer(GTK_WINDOW(ctx->window), GTK_LAYER_SHELL_LAYER_TOP);
         gtk_layer_set_monitor(GTK_WINDOW(ctx->window), ctx->monitor);
         gtk_layer_auto_exclusive_zone_enable(GTK_WINDOW(ctx->window));
-        gtk_layer_set_margin(GTK_WINDOW(ctx->window), GTK_LAYER_SHELL_EDGE_LEFT, 0);
-        gtk_layer_set_margin(GTK_WINDOW(ctx->window), GTK_LAYER_SHELL_EDGE_RIGHT, 0);
-        gtk_layer_set_margin(GTK_WINDOW(ctx->window), GTK_LAYER_SHELL_EDGE_TOP, 0);
-        gtk_layer_set_margin(GTK_WINDOW(ctx->window), GTK_LAYER_SHELL_EDGE_BOTTOM, 0);
-
-        GdkRectangle rect;
-        gdk_monitor_get_workarea(ctx->monitor, &rect);
-        gtk_widget_set_size_request(ctx->window, rect.width, rect.height);
+        gtk_layer_set_anchor(GTK_WINDOW(ctx->window), GTK_LAYER_SHELL_EDGE_LEFT, TRUE);
+        gtk_layer_set_anchor(GTK_WINDOW(ctx->window), GTK_LAYER_SHELL_EDGE_RIGHT, TRUE);
+        gtk_layer_set_anchor(GTK_WINDOW(ctx->window), GTK_LAYER_SHELL_EDGE_TOP, TRUE);
+        gtk_layer_set_anchor(GTK_WINDOW(ctx->window), GTK_LAYER_SHELL_EDGE_BOTTOM, TRUE);
     }
 
 #endif
