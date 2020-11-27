@@ -20,8 +20,8 @@ static GOptionEntry entries[] =
 
 #ifdef LAYER_SHELL
   { "layer-shell", 'l', 0, G_OPTION_ARG_NONE, &use_layer_shell, "Use layer shell", NULL},
-  { "command", 'c', 0, G_OPTION_ARG_STRING, &command, "Command to run", "sway"},
 #endif
+  { "command", 'c', 0, G_OPTION_ARG_STRING, &command, "Command to run", "sway"},
   { "background", 'b', 0, G_OPTION_ARG_STRING, &background, "Background image to use", NULL},
   { NULL }
 };
