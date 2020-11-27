@@ -199,9 +199,11 @@ static void window_setup(struct Window *ctx) {
 
     if (ctx->window_box == NULL) {
         ctx->window_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+        gtk_widget_set_name(ctx->window_box, "window");
         gtk_container_add(GTK_CONTAINER(ctx->revealer), ctx->window_box);
 
         ctx->clock_label = gtk_label_new("");
+        gtk_widget_set_name(ctx->clock_label, "clock");
         g_object_set(ctx->clock_label, "margin-bottom", 10, NULL);
         gtk_container_add(GTK_CONTAINER(ctx->window_box), ctx->clock_label);
         window_update_clock(ctx);
@@ -212,6 +214,7 @@ static void window_setup(struct Window *ctx) {
         if (ctx->body == NULL) {
             ctx->body = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
             gtk_widget_set_halign(ctx->body, GTK_ALIGN_CENTER);
+            gtk_widget_set_name(ctx->body, "body");
             gtk_widget_set_size_request(ctx->body, 384, -1);
             gtk_container_add(GTK_CONTAINER(ctx->window_box), ctx->body);
             window_update_clock(ctx);

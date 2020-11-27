@@ -10,6 +10,7 @@ struct GtkGreet *gtkgreet = NULL;
 
 static char* command = NULL;
 static char* background = NULL;
+static char* style = NULL;
 
 #ifdef LAYER_SHELL
 static gboolean use_layer_shell = FALSE;
@@ -23,6 +24,7 @@ static GOptionEntry entries[] =
 #endif
   { "command", 'c', 0, G_OPTION_ARG_STRING, &command, "Command to run", "sway"},
   { "background", 'b', 0, G_OPTION_ARG_STRING, &background, "Background image to use", NULL},
+  { "style", 's', 0, G_OPTION_ARG_FILENAME, &style, "CSS style to use", NULL },
   { NULL }
 };
 
@@ -101,6 +103,21 @@ static void activate(GtkApplication *app, gpointer user_data) {
     }
 }
 
+static void attach_custom_style(const char* path) {
+    GtkCssProvider *provider = gtk_css_provider_new();
+    GError *err = NULL;
+
+    gtk_css_provider_load_from_path(provider, path, &err);
+    if (err != NULL) {
+        g_warning("style loading failed: %s", err->message);
+        g_error_free(err);
+    } else {
+        gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
+                GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+    }
+    g_object_unref(provider);
+}
+
 int main (int argc, char **argv) {
     GError *error = NULL;
     GOptionContext *option_context = g_option_context_new("- GTK-based greeter for greetd");
@@ -123,6 +140,10 @@ int main (int argc, char **argv) {
         if (gtkgreet->background == NULL) {
             g_print("background loading failed: %s\n", error->message);
         }
+    }
+
+    if (style != NULL) {
+        attach_custom_style(style);
     }
 
     g_signal_connect(gtkgreet->app, "activate", G_CALLBACK(activate), NULL);
