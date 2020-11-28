@@ -14,8 +14,8 @@ gtkgreet - A Gtk-based greeter for greetd
 	Show help message and quit.
 
 *-c, --command <command>*
-	Specifies the command to run on successful login. agreety will ask if none is
-	specified.
+	Specifies the command to run on successful login. gtkgreet will ask if none
+	is specified.
 
 *-l, --layer-shell*
 	Use wlr-layer-shell to display a window on every output. Must be enabled at
@@ -25,6 +25,11 @@ gtkgreet - A Gtk-based greeter for greetd
 	Specifies a background image to be used by gtkgreet. JPG and PNG are known
 	to work. The image will be anchored to the upper left corner, and is
 	rendered 1:1 when DPI scaling is 1.
+
+*-s, --style <file.css>*
+	Specifies a custom CSS stylesheet with additional styles for the gtkgreet
+	window. See https://developer.gnome.org/gtk3/stable/theming.html for the
+	description of CSS subset supported in GTK.
 
 # DESCRIPTION
 
