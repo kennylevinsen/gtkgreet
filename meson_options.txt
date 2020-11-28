@@ -1,2 +1,2 @@
-option('layershell', type : 'boolean', value : false)
+option('layershell', type: 'feature', value: 'auto')
 option('man-pages', type: 'feature', value: 'auto', description: 'Generate and install man pages')

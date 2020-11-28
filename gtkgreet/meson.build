@@ -1,7 +1,8 @@
 dependencies = [dependency('gtk+-3.0'), dependency('json-c')]
 
-if get_option('layershell')
-	dependencies += dependency('gtk-layer-shell-0')
+gtk_layer_shell = dependency('gtk-layer-shell-0', required: get_option('layershell'))
+if gtk_layer_shell.found()
+	dependencies += gtk_layer_shell
 	add_project_arguments('-DLAYER_SHELL', language : 'c')
 endif
 

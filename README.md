@@ -11,16 +11,17 @@ See the [wiki](https://man.sr.ht/~kennylevinsen/greetd) for FAQ, guides for comm
 
 See the wiki.
 
-## How to build with gtk-layer-shell (recommended)
+## How to build
 
 ```
-meson -Dlayershell=true build
+meson build
 ninja -C build
 ```
+Layer-shell support will be enabled automatically if [gtk-layer-shell](https://github.com/wmww/gtk-layer-shell) development files are installed.
 
 ## How to build without gtk-layer-shell
 
 ```
-meson build
+meson build -Dlayershell=disabled
 ninja -C build
 ```
