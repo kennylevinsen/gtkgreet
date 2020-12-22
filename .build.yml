@@ -1,6 +1,4 @@
 image: archlinux
-secrets:
-  - 46e8e572-0807-4a50-b2e5-614cb1c66cca
 packages:
   - gcc
   - meson
@@ -8,10 +6,6 @@ packages:
 sources:
   - https://git.sr.ht/~kennylevinsen/gtkgreet
 tasks:
-  - github-mirror: |
-      cd gtkgreet
-      ssh-keyscan github.com >> ~/.ssh/known_hosts
-      git push --quiet --mirror git@github.com:kennylevinsen/gtkgreet.git
   - build: |
       cd gtkgreet
       meson build
