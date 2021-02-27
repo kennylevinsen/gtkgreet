@@ -21,7 +21,7 @@ struct header {
 
 static int write_req(int fd, struct json_object* req) {
     const char* reqstr = json_object_get_string(req);
-    uint32_t len = strlen(reqstr);
+    ssize_t len = (ssize_t)strlen(reqstr);
     char* headerp = (char*)&len;
     ssize_t off = 0;
 
