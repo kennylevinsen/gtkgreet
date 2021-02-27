@@ -1,7 +1,7 @@
 project(
 	'gtkgreet',
 	'c',
-	version: '0.5',
+	version: '0.7',
 	license: 'GPL3',
 	meson_version: '>=0.47.0',
 	default_options: [
