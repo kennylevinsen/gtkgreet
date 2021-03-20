@@ -26,10 +26,17 @@ gtkgreet - A Gtk-based greeter for greetd
 	to work. The image will be anchored to the upper left corner, and is
 	rendered 1:1 when DPI scaling is 1.
 
+	*Note:* This does not handle scaling values other than 1 correctly. Use
+	a stylesheet for more flexible and correct background rendition.
+
 *-s, --style <file.css>*
 	Specifies a custom CSS stylesheet with additional styles for the gtkgreet
 	window. See https://developer.gnome.org/gtk3/stable/theming.html for the
 	description of CSS subset supported in GTK.
+
+	*Note:* This is not able to load Gtk theme stylesheets, and is only for
+	application-level modifications. To select a theme, use the regular Gtk
+	theme selection mechanisms.
 
 # DESCRIPTION
 
@@ -58,6 +65,27 @@ gtkgreet has finalized a login.
 See *greetd*(5) for information on how to configure greetd. Read the
 documentation of your chosen compositor for information on how to use it
 correctly.
+
+# STYLING
+
+The stylesheet can be used to modify styling of gtkgreet elements, such as the
+window background, fonts, login prompt container and others.
+
+An example stylesheet can be seen here:
+
+```
+window {
+        background-image: url("file:///etc/greetd/gtkgreet-background.jpg");
+        background-size: cover;
+        background-position: center;
+}
+
+box#body {
+        background-color: rgba(50, 50, 50, 0.5);
+        border-radius: 10px;
+        padding: 50px;
+}
+```
 
 # ENVIRONMENTS
 
