@@ -21,9 +21,13 @@ struct header {
 
 static int write_req(int fd, struct json_object* req) {
     const char* reqstr = json_object_get_string(req);
-    ssize_t len = (ssize_t)strlen(reqstr);
-    char* headerp = (char*)&len;
-    ssize_t off = 0;
+    size_t len = strlen(reqstr);
+    if (len > 0xFFFFFFFF) {
+	    goto error;
+    }
+    uint32_t header = len;
+    char* headerp = (char*)&header;
+    uint32_t off = 0;
 
     while (off < 4) {
         ssize_t n = write(fd, &headerp[off], 4-off);
@@ -51,7 +55,7 @@ static struct json_object* read_resp(int fd) {
     struct json_object* resp = NULL;
     char *respstr = NULL;
     uint32_t len;
-    ssize_t off = 0;
+    uint32_t off = 0;
 
     while (off < 4) {
         char* headerp = (char*)&len;
