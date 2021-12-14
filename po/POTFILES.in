@@ -1,0 +1,4 @@
+gtkgreet/actions.c
+gtkgreet/gtkgreet.c
+gtkgreet/proto.c
+gtkgreet/window.c

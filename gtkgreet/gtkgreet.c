@@ -2,6 +2,8 @@
 
 #include <gtk/gtk.h>
 
+#include <glib/gi18n.h>
+
 #include "window.h"
 #include "gtkgreet.h"
 
@@ -99,7 +101,7 @@ struct GtkGreet* create_gtkgreet() {
 
 void gtkgreet_activate(struct GtkGreet *gtkgreet) {
     gtkgreet->draw_clock_source = g_timeout_add_seconds(5, gtkgreet_update_clocks_handler, gtkgreet);
-    gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, INITIAL_QUESTION, NULL);
+    gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, gtkgreet_get_initial_question(), NULL);
     gtkgreet_update_clocks(gtkgreet);
 }
 
@@ -121,4 +123,8 @@ void gtkgreet_destroy(struct GtkGreet *gtkgreet) {
         gtkgreet->draw_clock_source = 0;
     }
     free(gtkgreet);
+}
+
+char* gtkgreet_get_initial_question() {
+    return _("Username:");
 }

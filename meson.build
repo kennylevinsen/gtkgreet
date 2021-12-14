@@ -14,6 +14,7 @@ project(
 add_project_arguments('-Wno-unused-parameter', language: 'c')
 add_project_arguments('-Wno-missing-braces', language: 'c')
 
+subdir('po')
 subdir('gtkgreet')
 
 scdoc = dependency('scdoc', required: get_option('man-pages'), version: '>= 1.9.7')

@@ -1,0 +1,48 @@
+# Spanish translations for gtkgreet package.
+# Copyright (C) 2021 THE gtkgreet'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the gtkgreet package.
+# Automatically generated, 2021.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: gtkgreet\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-12-14 14:12-0300\n"
+"PO-Revision-Date: 2021-12-14 14:12-0300\n"
+"Last-Translator: Javier Steinaker <jsteinaker@gmail.com>\n"
+"Language-Team: none\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: gtkgreet/actions.c:35
+msgid "Unexpected auth question"
+msgstr "Pregunta de autenticación inesperada"
+
+#: gtkgreet/actions.c:56
+msgid "Login failed"
+msgstr "Inicio de sesión fallido"
+
+#: gtkgreet/gtkgreet.c:129
+msgid "Username:"
+msgstr "Nombre de usuario"
+
+#: gtkgreet/proto.c:184
+#, c-format
+msgid "proto: roundtrip failed"
+msgstr "Error de protocolo"
+
+#: gtkgreet/window.c:122
+msgid "Command to run on login"
+msgstr "Comando a ejecutar al iniciar sesión"
+
+#: gtkgreet/window.c:148
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: gtkgreet/window.c:158
+msgid "Log in"
+msgstr "Iniciar sesión"

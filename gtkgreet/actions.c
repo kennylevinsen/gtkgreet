@@ -3,6 +3,8 @@
 #include <time.h>
 #include <assert.h>
 
+#include <glib/gi18n.h>
+
 #include <gtk/gtk.h>
 
 #include "actions.h"
@@ -30,8 +32,8 @@ static void handle_response(struct response resp, int start_req) {
                 };
                 roundtrip(req);
 
-                char *error = "Unexpected auth question";
-                gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, INITIAL_QUESTION, error);
+                char *error = _("Unexpected auth question");
+                gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, gtkgreet_get_initial_question(), error);
                 break;
             }
 
@@ -51,11 +53,11 @@ static void handle_response(struct response resp, int start_req) {
             char* error = NULL;
             if (resp.response_type == response_type_error &&
                 resp.body.response_error.error_type == error_type_auth) {
-                error = "Login failed";
+                error = _("Login failed");
             } else {
                 error = resp.body.response_error.description;
             }
-            gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, INITIAL_QUESTION, error);
+            gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, gtkgreet_get_initial_question(), error);
             break;
         }
     }
@@ -112,5 +114,5 @@ void action_cancel_question(GtkWidget *widget, gpointer data) {
         exit(1);
     }
 
-    gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, INITIAL_QUESTION, NULL);
+    gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, gtkgreet_get_initial_question(), NULL);
 }

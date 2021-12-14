@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include <errno.h>
 
+#include <glib/gi18n.h>
+
 #include "proto.h"
 #include "window.h"
 
@@ -179,7 +181,7 @@ struct response roundtrip(struct request req) {
 
     struct json_object* json_resp = roundtrip_json(json_req);
     if (json_resp == NULL) {
-        snprintf(resp.body.response_error.description, 128, "proto: roundtrip failed");
+        snprintf(resp.body.response_error.description, 128, _("proto: roundtrip failed"));
         goto done;
     }
 

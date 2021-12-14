@@ -3,6 +3,8 @@
 #include <time.h>
 #include <assert.h>
 
+#include <glib/gi18n.h>
+
 #include <gtk/gtk.h>
 
 #include "proto.h"
@@ -117,7 +119,7 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
         gtk_combo_box_set_active((GtkComboBox*)ctx->command_selector, 0);
 
         GtkWidget *selector_entry = gtk_bin_get_child((GtkBin*)ctx->command_selector);
-        gtk_entry_set_placeholder_text((GtkEntry*)selector_entry, "Command to run on login");
+        gtk_entry_set_placeholder_text((GtkEntry*)selector_entry, _("Command to run on login"));
         g_signal_connect(selector_entry, "activate", G_CALLBACK(action_answer_question), ctx);
 
         gtk_container_add(GTK_CONTAINER(ctx->input_box), ctx->command_selector);
@@ -143,7 +145,7 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
         case QuestionTypeSecret:
         case QuestionTypeInfo:
         case QuestionTypeError: {
-            GtkWidget *cancel_button = gtk_button_new_with_label("Cancel");
+            GtkWidget *cancel_button = gtk_button_new_with_label(_("Cancel"));
             gtk_widget_set_halign(cancel_button, GTK_ALIGN_END);
             gtk_container_add(GTK_CONTAINER(button_box), cancel_button);
             g_signal_connect(cancel_button, "clicked", G_CALLBACK(action_cancel_question), ctx);
@@ -153,7 +155,7 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
             break;
     }
 
-    GtkWidget *continue_button = gtk_button_new_with_label("Log in");
+    GtkWidget *continue_button = gtk_button_new_with_label(_("Log in"));
     g_signal_connect(continue_button, "clicked", G_CALLBACK(action_answer_question), ctx);
     GtkStyleContext *continue_button_style = gtk_widget_get_style_context(continue_button);
     gtk_style_context_add_class(continue_button_style, "suggested-action");

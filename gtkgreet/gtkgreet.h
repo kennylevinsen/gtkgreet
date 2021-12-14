@@ -3,7 +3,6 @@
 
 #include <gtk/gtk.h>
 
-#define INITIAL_QUESTION "Username:"
 
 enum QuestionType {
 	QuestionTypeInitial = 0,
@@ -48,5 +47,6 @@ void gtkgreet_update_clocks(struct GtkGreet *gtkgreet);
 struct GtkGreet* create_gtkgreet();
 void gtkgreet_activate(struct GtkGreet *gtkgreet);
 void gtkgreet_destroy(struct GtkGreet *gtkgreet);
+char* gtkgreet_get_initial_question();
 
 #endif
