@@ -88,6 +88,7 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
             gtk_container_add(GTK_CONTAINER(question_box), label);
 
             ctx->input_field = gtk_entry_new();
+            gtk_widget_set_name(ctx->input_field, "input-field");
             if (type == QuestionTypeSecret) {
                 gtk_entry_set_input_purpose((GtkEntry*)ctx->input_field, GTK_INPUT_PURPOSE_PASSWORD);
                 gtk_entry_set_visibility((GtkEntry*)ctx->input_field, FALSE);
@@ -111,6 +112,7 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
 
     if (type == QuestionTypeInitial) {
         ctx->command_selector = gtk_combo_box_text_new_with_entry();
+        gtk_widget_set_name(ctx->command_selector, "command-selector");
         gtk_widget_set_size_request(ctx->command_selector, 384, -1);
         config_update_command_selector(ctx->command_selector);
         gtk_widget_set_halign(ctx->command_selector, GTK_ALIGN_END);
