@@ -93,7 +93,7 @@ static int gtkgreet_update_clocks_handler(gpointer data) {
 
 struct GtkGreet* create_gtkgreet() {
     gtkgreet = calloc(1, sizeof(struct GtkGreet));
-    gtkgreet->app = gtk_application_new("wtf.kl.gtkgreet", G_APPLICATION_FLAGS_NONE);
+    gtkgreet->app = gtk_application_new("wtf.kl.gtkgreet", G_APPLICATION_DEFAULT_FLAGS);
     gtkgreet->windows = g_array_new(FALSE, TRUE, sizeof(struct Window*));
     gtkgreet->question_cnt = 1;
     return gtkgreet;
