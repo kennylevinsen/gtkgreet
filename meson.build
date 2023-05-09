@@ -14,6 +14,9 @@ project(
 add_project_arguments('-Wno-unused-parameter', language: 'c')
 add_project_arguments('-Wno-missing-braces', language: 'c')
 
+prefix = get_option('prefix')
+localedir = join_paths(prefix, get_option('localedir'))
+
 subdir('po')
 subdir('gtkgreet')
 

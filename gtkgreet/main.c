@@ -6,6 +6,9 @@
 #include "window.h"
 #include "gtkgreet.h"
 
+#include <glib/gi18n.h>
+#include <locale.h>
+
 struct GtkGreet *gtkgreet = NULL;
 
 static char* command = NULL;
@@ -119,6 +122,11 @@ static void attach_custom_style(const char* path) {
 }
 
 int main (int argc, char **argv) {
+    setlocale(LC_ALL, "");
+    bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
+    bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
+    textdomain(GETTEXT_PACKAGE);
+
     GError *error = NULL;
     GOptionContext *option_context = g_option_context_new("- GTK-based greeter for greetd");
     g_option_context_add_main_entries(option_context, entries, NULL);
