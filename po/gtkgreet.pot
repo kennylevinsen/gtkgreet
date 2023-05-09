@@ -29,11 +29,6 @@ msgstr ""
 msgid "Username:"
 msgstr ""
 
-#: gtkgreet/proto.c:184
-#, c-format
-msgid "proto: roundtrip failed"
-msgstr ""
-
 #: gtkgreet/window.c:122
 msgid "Command to run on login"
 msgstr ""
