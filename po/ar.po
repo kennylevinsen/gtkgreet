@@ -1,0 +1,44 @@
+# Arabic translations for gtkgreet package.
+# Copyright (C) 2024 THE gtkgreet'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the gtkgreet package.
+# Maytham Alsudany <maytha8thedev@gmail.com>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gtkgreet\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-12-14 14:12-0300\n"
+"PO-Revision-Date: 2024-04-22 14:19+0300\n"
+"Last-Translator: Maytham Alsudany <maytha8thedev@gmail.com>\n"
+"Language-Team: Arabic <debian-l10n-arabic@lists.debian.org>\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Gtranslator 42.0\n"
+"Plural-Forms: nplurals=6; plural= n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+#: gtkgreet/actions.c:35
+msgid "Unexpected auth question"
+msgstr "Ø³Ø¤Ø§Ù„ Ø§Ù„Ù…ØµØ§Ø¯Ù‚Ø© ØºÙŠØ± Ù…ØªÙˆÙ‚Ø¹Ø©"
+
+#: gtkgreet/actions.c:56
+msgid "Login failed"
+msgstr "ÙØ´Ù„ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„"
+
+#: gtkgreet/gtkgreet.c:129
+msgid "Username:"
+msgstr "Ø§Ø³Ù… Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…:"
+
+#: gtkgreet/window.c:122
+msgid "Command to run on login"
+msgstr "Ø§Ù„Ø£Ù…Ø± Ù„Ù„ØªØ´ØºÙ„ Ø¹Ù†Ø¯ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„"
+
+#: gtkgreet/window.c:148
+msgid "Cancel"
+msgstr "Ø§Ù„ØºØ§Ø¡"
+
+#: gtkgreet/window.c:158
+msgid "Log in"
+msgstr "ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„"
