@@ -61,6 +61,18 @@ void window_update_clock(struct Window *ctx) {
     gtk_label_set_markup((GtkLabel*)ctx->clock_label, time);
 }
 
+void on_visibility_icon_press(GtkWidget *widget, gpointer data) {
+    gboolean visible = gtk_entry_get_visibility(GTK_ENTRY(widget));
+
+    if (visible) {
+        gtk_entry_set_visibility(GTK_ENTRY(widget), FALSE);
+        gtk_entry_set_icon_from_icon_name(GTK_ENTRY(widget), GTK_ENTRY_ICON_SECONDARY, "view-reveal-symbolic");
+    } else {
+        gtk_entry_set_visibility(GTK_ENTRY(widget), TRUE);
+        gtk_entry_set_icon_from_icon_name(GTK_ENTRY(widget), GTK_ENTRY_ICON_SECONDARY, "view-conceal-symbolic");
+    }
+}
+
 void window_setup_question(struct Window *ctx, enum QuestionType type, char* question, char* error) {
     if (gtkgreet->focused_window != NULL && ctx != gtkgreet->focused_window) {
         return;
@@ -94,6 +106,9 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
             if (type == QuestionTypeSecret) {
                 gtk_entry_set_input_purpose((GtkEntry*)ctx->input_field, GTK_INPUT_PURPOSE_PASSWORD);
                 gtk_entry_set_visibility((GtkEntry*)ctx->input_field, FALSE);
+                gtk_entry_set_icon_from_icon_name(GTK_ENTRY((GtkEntry*)ctx->input_field), GTK_ENTRY_ICON_SECONDARY, "view-reveal-symbolic");
+                gtk_entry_set_icon_activatable((GtkEntry*)ctx->input_field, GTK_ENTRY_ICON_SECONDARY, TRUE);
+                g_signal_connect(ctx->input_field, "icon-press", G_CALLBACK(on_visibility_icon_press), NULL);
             }
             g_signal_connect(ctx->input_field, "activate", G_CALLBACK(action_answer_question), ctx);
             gtk_widget_set_size_request(ctx->input_field, 384, -1);
