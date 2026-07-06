@@ -110,6 +110,8 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
                 gtk_entry_set_icon_activatable((GtkEntry*)ctx->input_field, GTK_ENTRY_ICON_SECONDARY, TRUE);
                 g_signal_connect(ctx->input_field, "icon-press", G_CALLBACK(on_visibility_icon_press), NULL);
             }
+            if (gtkgreet->default_username != NULL && type == QuestionTypeInitial)
+                gtk_entry_set_text((GtkEntry*)ctx->input_field, gtkgreet->default_username);
             g_signal_connect(ctx->input_field, "activate", G_CALLBACK(action_answer_question), ctx);
             gtk_widget_set_size_request(ctx->input_field, 384, -1);
             gtk_widget_set_halign(ctx->input_field, GTK_ALIGN_END);

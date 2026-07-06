@@ -38,6 +38,10 @@ gtkgreet - A Gtk-based greeter for greetd
 	application-level modifications. To select a theme, use the regular Gtk
 	theme selection mechanisms.
 
+*-u, --username <default-username>*
+	Specifies the default username to use. This will place the username in
+	the "Username" input box.
+
 # DESCRIPTION
 
 gtkgreet is a Gtk-based, graphical greeter for *greetd*(1).

@@ -27,6 +27,7 @@ struct GtkGreet {
     gboolean use_layer_shell;
 #endif
     char* command;
+    char* default_username;
 
     char* selected_command;
     enum QuestionType question_type;
